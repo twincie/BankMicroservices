@@ -23,13 +23,6 @@ public class Wallet {
     private String accountNumber = accountNumberGenerator().toString();
     private BigDecimal amount = BigDecimal.ZERO;
 
-//    @JsonIgnore
-//    @OneToOne(mappedBy = "wallet")
-//    private Users user;
-//
-//    @OneToMany(mappedBy = "wallet")
-//    private List<Transaction> transactions;
-
     public Long accountNumberGenerator(){
         Random random = new Random();
         int randomNumber = 1000000000 + random.nextInt(900000000);

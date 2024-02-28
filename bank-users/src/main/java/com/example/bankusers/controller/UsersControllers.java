@@ -1,5 +1,6 @@
 package com.example.bankusers.controller;
 
+import com.example.bankusers.dto.UsersResponseDto;
 import com.example.bankusers.entity.Users;
 import com.example.bankusers.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +21,12 @@ public class UsersControllers {
         return usersService.readAll();
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public Users createUser(@RequestBody Users users){
         return usersService.create(users);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Users> readOneUser(@PathVariable Long id){
+    public UsersResponseDto readOneUser(@PathVariable Long id){
         return usersService.readOne(id);
     }
 

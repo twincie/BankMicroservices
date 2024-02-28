@@ -10,12 +10,13 @@ import java.util.Random;
 @Getter
 public class Wallet {
     private Long id;
-    private String accountNumber = accountNumberGenerator().toString();
-    private BigDecimal amount = BigDecimal.ZERO;
+    private String accountNumber;
+    private BigDecimal amount;
 
-    public Long accountNumberGenerator(){
-        Random random = new Random();
-        int randomNumber = 1000000000 + random.nextInt(900000000);
-        return (long) randomNumber;
+    @Override
+    public String toString() {
+        return "Id: "+ id +
+                " account number: "+ accountNumber +
+                " ammount: "+ amount;
     }
 }

@@ -13,4 +13,6 @@ public class Wallet {
     private Long id;
     private String accountNumber;
     private BigDecimal amount;
+
+
 }
