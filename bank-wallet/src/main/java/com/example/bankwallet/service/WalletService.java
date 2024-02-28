@@ -1,9 +1,15 @@
 package com.example.bankwallet.service;
 
 
+import com.example.bankwallet.dto.WalletDto;
+import com.example.bankwallet.external.Transaction;
+import com.example.bankwallet.external.Users;
+import com.example.bankwallet.mapper.WalletMapper;
 import com.example.bankwallet.repository.WalletRepository;
 import com.example.bankwallet.entity.Wallet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,8 +22,10 @@ import java.util.Optional;
 @Service
 public class WalletService {
 
-//    private final RestTemplate restTemplate;
-//    private final String transactionServiceBaseUrl = "http://localhost:8080/api/v1/wallet/902/transaction";
+    private final RestTemplate restTemplate;
+
+    private final String userServiceBaseUrl = "http://localhost:8081/api/v1/users/";
+    private final String transactionServiceBaseUrl = "http://localhost:8083/api/v1/wallet/";
 
     @Autowired
     private WalletRepository walletRepository;
@@ -25,9 +33,20 @@ public class WalletService {
 //    @Autowired
 //    private TransactionRepository transactionRepository;
 
-//    public WalletService(RestTemplate restTemplate) {
-//        this.restTemplate = restTemplate;
-//    }
+    public WalletService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    private WalletDto convertToDto(Wallet wallet){
+
+//        Users user = restTemplate.getForObject(userServiceBaseUrl + ,Users.class);
+        ResponseEntity<List<Transaction>> transaction = restTemplate.exchange(transactionServiceBaseUrl + wallet.getId() + "/transaction", HttpMethod.GET, null, new ParameterizedTypeReference<List<Transaction>>(){});
+        List<Transaction> transactions= transaction.getBody();
+//        System.out.println(user.getUsername());
+
+        WalletDto walletDto = WalletMapper.walletMapperDto(wallet, transactions);
+        return walletDto;
+    }
 
     //=================================== CRUD START =================================
     public Wallet create(Wallet wallet){
@@ -42,8 +61,9 @@ public class WalletService {
 //        }
 //        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 //    }
-    public ResponseEntity<Wallet> readOne(Long walletId){
-        return new ResponseEntity<>(walletRepository.findById(walletId).orElseThrow(null), HttpStatus.OK);
+    public WalletDto readOne(Long walletId){
+        Wallet wallet = walletRepository.findById(walletId).orElseThrow(null);
+        return convertToDto(wallet);
     }
     public List<Wallet> readAll(){
         return walletRepository.findAll();

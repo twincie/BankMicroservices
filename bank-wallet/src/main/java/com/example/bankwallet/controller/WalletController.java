@@ -1,5 +1,6 @@
 package com.example.bankwallet.controller;
 
+import com.example.bankwallet.dto.WalletDto;
 import com.example.bankwallet.service.WalletService;
 import com.example.bankwallet.entity.Wallet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class WalletController {
         return walletService.create(wallet);
     }
     @GetMapping("/{walletId}")
-    public ResponseEntity<Wallet> readOneWallet(@PathVariable Long walletId){
+    public WalletDto readOneWallet(@PathVariable Long walletId){
         return walletService.readOne(walletId);
         //return walletService.readOne(walletId);
     }
@@ -43,11 +44,6 @@ public class WalletController {
     }
     //    CRUD END
     //======================================================================
-
-
-
-
-
 
     @PutMapping("/{walletId}/topup")
     public ResponseEntity<String> topUpWallet(@PathVariable Long walletId, @RequestBody Map<String, BigDecimal> request){

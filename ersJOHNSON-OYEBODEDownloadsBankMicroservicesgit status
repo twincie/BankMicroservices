@@ -1,0 +1,29 @@
+[33mcommit 6e1498b572dab1f14d956f5af534212aed8c17b5[m[33m ([m[1;36mHEAD -> [m[1;32mlocal[m[33m)[m
+Author: Johnson <oyebodej2@gmail.com>
+Date:   Wed Feb 28 15:26:06 2024 +0100
+
+    created dto, mappers, commun users and wallet, simultaneously create wallet and users
+
+[33mcommit b9a790107f6229d9179e872dd7462dd4d43dd5f8[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: Johnson <oyebodej2@gmail.com>
+Date:   Tue Feb 27 21:04:55 2024 +0100
+
+    first commit on bank-transaction
+
+[33mcommit 022ec83b79facf2093ce5642d78548d4b13f0773[m
+Author: Johnson <oyebodej2@gmail.com>
+Date:   Tue Feb 27 21:03:56 2024 +0100
+
+    first commit on bank-wallet
+
+[33mcommit 6cf727b79421c5c4781463c9a80d0030a336cd23[m
+Author: Johnson <oyebodej2@gmail.com>
+Date:   Tue Feb 27 21:02:47 2024 +0100
+
+    first commit on bank-users
+
+[33mcommit ed6cc7b24419a41df74f0c4f08babe81138f7a5d[m
+Author: Johnson <oyebodej2@gmail.com>
+Date:   Tue Feb 27 20:48:19 2024 +0100
+
+    Initial commit
