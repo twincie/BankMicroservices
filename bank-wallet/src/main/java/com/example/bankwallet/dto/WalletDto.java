@@ -1,7 +1,6 @@
 package com.example.bankwallet.dto;
 
 import com.example.bankwallet.external.Transaction;
-import com.example.bankwallet.external.Users;
 import lombok.Data;
 
 import java.math.BigDecimal;

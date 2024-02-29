@@ -3,7 +3,6 @@ package com.example.bankwallet.mapper;
 import com.example.bankwallet.dto.WalletDto;
 import com.example.bankwallet.entity.Wallet;
 import com.example.bankwallet.external.Transaction;
-import com.example.bankwallet.external.Users;
 
 import java.util.List;
 

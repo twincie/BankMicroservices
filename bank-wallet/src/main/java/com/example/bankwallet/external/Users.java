@@ -1,6 +1,5 @@
 package com.example.bankwallet.external;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data

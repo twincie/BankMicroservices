@@ -21,9 +21,6 @@ public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-//    @Autowired
-//    private WalletRepository walletRepository;
-
     public TransactionService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
