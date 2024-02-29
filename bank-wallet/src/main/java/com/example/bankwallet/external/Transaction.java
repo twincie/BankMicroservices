@@ -13,4 +13,5 @@ public class Transaction {
     private BigDecimal amount;
     private LocalDate date = LocalDate.now();
     private LocalTime time = LocalTime.now();
+    private Long walletId;
 }

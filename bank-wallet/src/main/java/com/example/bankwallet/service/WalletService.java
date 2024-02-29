@@ -3,6 +3,7 @@ package com.example.bankwallet.service;
 
 import com.example.bankwallet.dto.WalletDto;
 import com.example.bankwallet.external.Transaction;
+import com.example.bankwallet.external.TransactionType;
 import com.example.bankwallet.external.Users;
 import com.example.bankwallet.mapper.WalletMapper;
 import com.example.bankwallet.repository.WalletRepository;
@@ -48,6 +49,11 @@ public class WalletService {
         return walletDto;
     }
 
+//    private ResponseEntity<String> makeTransaction(Wallet wallet){
+//
+//        Transaction transaction = restTemplate.postForObject(transactionServiceBaseUrl + wallet.getId() + "/transaction", ,Transaction.class);
+//    }
+
     //=================================== CRUD START =================================
     public Wallet create(Wallet wallet){
         return walletRepository.save(wallet);
@@ -79,50 +85,52 @@ public class WalletService {
     //=================================== CRUD END =================================
 
     public void topup(Long walletId, BigDecimal amount){
-        Optional<Wallet> globalWallet = walletRepository.findByAccountNumber("1000000000");
+        Optional<Wallet> globalWalletInfo = walletRepository.findByAccountNumber("1000000000");
         Optional<Wallet> walletoptional = walletRepository.findById(walletId);
-        if (walletoptional.isPresent() && globalWallet.isPresent()){
+        if (walletoptional.isPresent() && globalWalletInfo.isPresent()){
             Wallet wallet = walletoptional.get();
-            if (amount.compareTo(charges(amount)) > 0){
+            if (amount.compareTo(charges(amount)) >= 0){
                 BigDecimal balance = wallet.getAmount().add(amount.subtract(charges(amount)));
                 wallet.setAmount(balance);
                 walletRepository.save(wallet);
 
-                Wallet wallet1 = globalWallet.get();
-                BigDecimal balance1 = wallet1.getAmount().add(charges(amount));
-                wallet1.setAmount(balance1);
-                walletRepository.save(wallet1);
-
-//                Transaction transaction = new Transaction();
-//                transaction.setAmount(amount);
-//                transaction.setType(TransactionType.TOPUP);
-//                transaction.setWallet(wallet);
+                Wallet globalWallet = globalWalletInfo.get();
+                BigDecimal globalBalance = globalWallet.getAmount().add(charges(amount));
+                globalWallet.setAmount(globalBalance);
+                walletRepository.save(globalWallet);
+                Transaction transaction = new Transaction();
+                transaction.setAmount(amount);
+                transaction.setType(TransactionType.TOPUP);
+                transaction.setWalletId(walletId);
 //                transactionRepository.save(transaction);
+                restTemplate.postForObject(transactionServiceBaseUrl + wallet.getId() + "/transaction", transaction ,Transaction.class);
             }
         }
     }
 
     public void withdraw(Long walletId, BigDecimal amount){
-        Optional<Wallet> globalWallet = walletRepository.findByAccountNumber("1000000000");
+        Optional<Wallet> globalWalletInfo = walletRepository.findByAccountNumber("1000000000");
         Optional<Wallet> walletoptional = walletRepository.findById(walletId);
-        if (walletoptional.isPresent() && globalWallet.isPresent()){
+        if (walletoptional.isPresent() && globalWalletInfo.isPresent()){
             Wallet wallet = walletoptional.get();
             // BigDecimal balance = wallet.getAmount();
             if(amount.compareTo(BigDecimal.ZERO) >0 && wallet.getAmount().compareTo(amount.add(charges(amount))) >= 0 ){
                 BigDecimal balance = wallet.getAmount().subtract(amount.add(charges(amount)));
                 wallet.setAmount(balance);
                 walletRepository.save(wallet);
+                Wallet globalWallet = globalWalletInfo.get();
+                BigDecimal globalBalance = globalWallet.getAmount().add(charges(amount));
+                globalWallet.setAmount(globalBalance);
+                walletRepository.save(globalWallet);
 
-                Wallet wallet1 = globalWallet.get();
-                BigDecimal balance1 = wallet1.getAmount().add(charges(amount));
-                wallet1.setAmount(balance1);
-                walletRepository.save(wallet1);
-
-//                Transaction transaction = new Transaction();
-//                transaction.setAmount(amount);
-//                transaction.setType(TransactionType.WITHDRAW);
-//                transaction.setWallet(wallet);
+                Transaction transaction = new Transaction();
+                transaction.setAmount(amount);
+                transaction.setType(TransactionType.WITHDRAW);
+                transaction.setWalletId(walletId);
+                System.out.println(walletId);
 //                transactionRepository.save(transaction);
+                restTemplate.postForObject(transactionServiceBaseUrl + wallet.getId() + "/transaction", transaction ,Transaction.class);
+                System.out.println(transactionServiceBaseUrl);
             }
 
         }
@@ -159,17 +167,22 @@ public class WalletService {
                 wallet1.setAmount(balance1);
                 walletRepository.save(wallet1);
 
-//                Transaction sendTransaction = new Transaction();
-//                sendTransaction.setAmount(amount);
-//                sendTransaction.setType(TransactionType.TRANSFER);
-//                sendTransaction.setWallet(sendWallet);
-//                transactionRepository.save(sendTransaction);
-//
-//                Transaction receiveTransaction = new Transaction();
-//                receiveTransaction.setAmount(amount);
-//                receiveTransaction.setType(TransactionType.TOPUP);
-//                receiveTransaction.setWallet(sendWallet);
-//                transactionRepository.save(receiveTransaction);
+                Transaction sendTransaction = new Transaction();
+                sendTransaction.setAmount(amount);
+                sendTransaction.setType(TransactionType.TRANSFER);
+                sendTransaction.setWalletId(walletId);
+                //sendTransaction.setWallet(sendWallet);
+                //transactionRepository.save(sendTransaction);
+                restTemplate.postForObject(transactionServiceBaseUrl + sendWallet.getId() + "/transaction", sendTransaction ,Transaction.class);
+
+                Transaction receiveTransaction = new Transaction();
+                receiveTransaction.setAmount(amount);
+                receiveTransaction.setType(TransactionType.TOPUP);
+                receiveTransaction.setWalletId(receiveWallet.getId());
+                System.out.println(receiveWallet.getId());
+                //receiveTransaction.setWallet(sendWallet);
+                //transactionRepository.save(receiveTransaction);
+                restTemplate.postForObject(transactionServiceBaseUrl + receiveWallet.getId() + "/transaction", receiveTransaction ,Transaction.class);
                 return true;
             }
             return false;
