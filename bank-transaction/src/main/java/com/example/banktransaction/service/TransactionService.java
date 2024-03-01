@@ -31,18 +31,15 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public boolean doesWalletExistForUser(Long walletId) {
-        boolean walletExists = false;
-        if (walletExists){
-            restTemplate.getForObject(walletServiceBaseUrl + "/{walletId}", Wallet.class, walletId);
+    public boolean doesWalletExist(Long walletId) {
+        Optional<Wallet> wallet = Optional.ofNullable(restTemplate.getForObject(walletServiceBaseUrl + "/" + walletId, Wallet.class));
+        if (wallet.isPresent()){
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
     public ResponseEntity<Optional<Transaction>> readOne(Long walletId, Long transactionId){
-//        String walletInfo = restTemplate.getForObject(walletServiceBaseUrl + "/wallets/{walletId}", String.class, walletId)
-        if(doesWalletExistForUser(walletId) && transactionRepository.existsById(transactionId)){
+        if(doesWalletExist(walletId) && transactionRepository.existsById(transactionId)){
             return new ResponseEntity<>(transactionRepository.findById(transactionId), HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -55,14 +52,14 @@ public class TransactionService {
         return transactionRepository.findAll();
     }
     public Transaction update(Long walletId, Long transactionId, Transaction updater){
-        if(doesWalletExistForUser(walletId) && transactionRepository.existsById(transactionId)){
+        if(doesWalletExist(walletId) && transactionRepository.existsById(transactionId)){
             updater.setId(transactionId);
             return transactionRepository.save(updater);
         }
         return null;
     }
     public void delete(Long walletId, Long transactionId){
-        if(doesWalletExistForUser(walletId) && transactionRepository.existsById(transactionId)) {
+        if(doesWalletExist(walletId) && transactionRepository.existsById(transactionId)) {
             transactionRepository.deleteById(transactionId);
         }
     }

@@ -10,6 +10,7 @@
         <module name="bank-transaction" />
         <module name="bank-wallet" />
         <module name="service-registry" />
+        <module name="gateway" />
         <module name="bank-users" />
       </profile>
     </annotationProcessing>
@@ -19,6 +20,7 @@
       <module name="bank-transaction" options="-parameters" />
       <module name="bank-users" options="-parameters" />
       <module name="bank-wallet" options="-parameters" />
+      <module name="gateway" options="-parameters" />
       <module name="service-registry" options="-parameters" />
     </option>
   </component>

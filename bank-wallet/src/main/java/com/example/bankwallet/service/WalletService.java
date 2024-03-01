@@ -24,14 +24,14 @@ public class WalletService {
     @Autowired
     private WalletRepository walletRepository;
     private final RestTemplate restTemplate;
-    private final String transactionServiceBaseUrl = "http://BANK-TRANSACTION:8083/api/v1/wallet/";
+    private final String transactionServiceBaseUrl = "http://BANK-TRANSACTION:8083/api/v1/transaction";
 
     public WalletService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     private WalletDto convertToDto(Wallet wallet){
-        ResponseEntity<List<Transaction>> transaction = restTemplate.exchange(transactionServiceBaseUrl + wallet.getId() + "/transaction", HttpMethod.GET, null, new ParameterizedTypeReference<List<Transaction>>(){});
+        ResponseEntity<List<Transaction>> transaction = restTemplate.exchange(transactionServiceBaseUrl+"?walletId=" + wallet.getId(), HttpMethod.GET, null, new ParameterizedTypeReference<List<Transaction>>(){});
         List<Transaction> transactions= transaction.getBody();
         WalletDto walletDto = WalletMapper.walletMapperDto(wallet, transactions);
         return walletDto;
@@ -76,7 +76,7 @@ public class WalletService {
                 transaction.setAmount(amount);
                 transaction.setType(TransactionType.TOPUP);
                 transaction.setWalletId(walletId);
-                restTemplate.postForObject(transactionServiceBaseUrl + wallet.getId() + "/transaction", transaction ,Transaction.class);
+                restTemplate.postForObject(transactionServiceBaseUrl+"?walletId=" + wallet.getId(), transaction ,Transaction.class);
             }
         }
     }
@@ -99,7 +99,7 @@ public class WalletService {
                 transaction.setType(TransactionType.WITHDRAW);
                 transaction.setWalletId(walletId);
                 System.out.println(walletId);
-                restTemplate.postForObject(transactionServiceBaseUrl + wallet.getId() + "/transaction", transaction ,Transaction.class);
+                restTemplate.postForObject(transactionServiceBaseUrl+"?walletId=" + wallet.getId(), transaction ,Transaction.class);
                 System.out.println(transactionServiceBaseUrl);
             }
 
@@ -139,13 +139,13 @@ public class WalletService {
                 sendTransaction.setAmount(amount);
                 sendTransaction.setType(TransactionType.TRANSFER);
                 sendTransaction.setWalletId(walletId);
-                restTemplate.postForObject(transactionServiceBaseUrl + sendWallet.getId() + "/transaction", sendTransaction ,Transaction.class);
+                restTemplate.postForObject(transactionServiceBaseUrl+"?walletId=" + sendWallet.getId(), sendTransaction ,Transaction.class);
                 Transaction receiveTransaction = new Transaction();
                 receiveTransaction.setAmount(amount);
                 receiveTransaction.setType(TransactionType.TOPUP);
                 receiveTransaction.setWalletId(receiveWallet.getId());
                 System.out.println(receiveWallet.getId());
-                restTemplate.postForObject(transactionServiceBaseUrl + receiveWallet.getId() + "/transaction", receiveTransaction ,Transaction.class);
+                restTemplate.postForObject(transactionServiceBaseUrl+"?walletId=" + receiveWallet.getId(), receiveTransaction ,Transaction.class);
                 return true;
             }
             return false;

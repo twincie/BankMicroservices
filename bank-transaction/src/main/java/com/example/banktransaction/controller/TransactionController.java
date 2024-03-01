@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/wallet/{walletId}/transaction")
+@RequestMapping("/api/v1/transaction")
 public class TransactionController {
 
     @Autowired
@@ -25,19 +25,19 @@ public class TransactionController {
         return transactionService.readAll();
     }
     @GetMapping("/{transactionId}")
-    public ResponseEntity<Optional<Transaction>> readOneTransaction(@PathVariable Long walletId, @PathVariable Long transactionId){
+    public ResponseEntity<Optional<Transaction>> readOneTransaction(@RequestParam Long walletId, @PathVariable Long transactionId){
         return transactionService.readOne(walletId,transactionId);
     }
     @GetMapping
-    public List<Transaction> readAllUserTransactions(@PathVariable Long walletId){
+    public List<Transaction> readAllUserTransactions(@RequestParam Long walletId){
         return transactionService.readOneUserTransactions(walletId);
     }
     @PutMapping("/{transactionId}")
-    public Transaction updateTransaction(@PathVariable Long walletId, @PathVariable Long transactionId, @RequestBody Transaction transaction){
+    public Transaction updateTransaction(@RequestParam Long walletId, @PathVariable Long transactionId, @RequestBody Transaction transaction){
         return transactionService.update(walletId, transactionId, transaction);
     }
     @DeleteMapping("/{transactionId}")
-    public void deleteTransaction(@PathVariable Long walletId, @PathVariable Long transactionId){
+    public void deleteTransaction(@RequestParam Long walletId, @PathVariable Long transactionId){
         transactionService.delete(walletId, transactionId);
     }
 }
