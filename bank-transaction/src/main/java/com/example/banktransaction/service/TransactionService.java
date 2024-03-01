@@ -16,7 +16,7 @@ import java.util.Optional;
 public class TransactionService {
 
     private final RestTemplate restTemplate;
-    private final String walletServiceBaseUrl = "http://localhost:8082/api/v1/wallet";
+    private final String walletServiceBaseUrl = "http://BANK-WALLET:8082/api/v1/wallet";
 
     @Autowired
     private TransactionRepository transactionRepository;

@@ -24,7 +24,7 @@ public class WalletService {
     @Autowired
     private WalletRepository walletRepository;
     private final RestTemplate restTemplate;
-    private final String transactionServiceBaseUrl = "http://localhost:8083/api/v1/wallet/";
+    private final String transactionServiceBaseUrl = "http://BANK-TRANSACTION:8083/api/v1/wallet/";
 
     public WalletService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;

@@ -23,7 +23,7 @@ public class UsersServiceImpl implements UsersService {
     RestTemplate restTemplate;
     @Autowired
     private UsersRepository usersRepository;
-    String walletServiceBaseUrl = "http://localhost:8082/api/v1/wallet";
+    String walletServiceBaseUrl = "http://BANK-WALLET:8082/api/v1/wallet";
 
     private UsersResponseDto convertToDto(Users user){
         Wallet wallet = restTemplate.getForObject(walletServiceBaseUrl+"/"+user.getWalletId(), Wallet.class);
