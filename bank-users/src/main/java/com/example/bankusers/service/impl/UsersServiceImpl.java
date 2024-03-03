@@ -10,10 +10,14 @@ import com.example.bankusers.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +49,20 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public UsersResponseDto readOne(Long id) {
-        Users user = usersRepository.findById(id).orElseThrow(null);
-        return convertToDto(user);
+//        Users user = usersRepository.findById(id).orElseThrow(null);
+        Optional<Users> optionalUsers = usersRepository.findById(id);
+        Users user = new Users();
+        if (optionalUsers.isPresent()){
+            user.setId(optionalUsers.get().getId());
+            user.setUsername(optionalUsers.get().getUsername());
+            user.setEmail(optionalUsers.get().getEmail());
+            user.setPassword(optionalUsers.get().getPassword());
+            user.setRole(optionalUsers.get().getRole());
+            user.setWalletId(optionalUsers.get().getWalletId());
+            return convertToDto(user);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -63,5 +79,16 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public void delete(Long id) {
         usersRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDetailsService userDetailsService(){
+        return new UserDetailsService() {
+            @Override
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                return usersRepository.findByUsername(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            }
+        };
     }
 }
