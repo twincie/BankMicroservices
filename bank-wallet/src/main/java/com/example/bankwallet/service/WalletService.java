@@ -4,6 +4,7 @@ package com.example.bankwallet.service;
 import com.example.bankwallet.dto.WalletDto;
 import com.example.bankwallet.external.Transaction;
 import com.example.bankwallet.external.TransactionType;
+import com.example.bankwallet.external.Users;
 import com.example.bankwallet.mapper.WalletMapper;
 import com.example.bankwallet.repository.WalletRepository;
 import com.example.bankwallet.entity.Wallet;
@@ -25,6 +26,8 @@ public class WalletService {
     private WalletRepository walletRepository;
     private final RestTemplate restTemplate;
     private final String transactionServiceBaseUrl = "http://BANK-TRANSACTION:8083/api/v1/transaction";
+
+    private final String usersServiceBaseUrl = "http://BANK-USERS:8081/api/v1/users";
 
     public WalletService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;

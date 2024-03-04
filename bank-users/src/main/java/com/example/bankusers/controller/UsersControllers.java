@@ -1,10 +1,10 @@
 package com.example.bankusers.controller;
 
 import com.example.bankusers.dto.UsersResponseDto;
+import com.example.bankusers.dto.userDto;
 import com.example.bankusers.entity.Users;
 import com.example.bankusers.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +17,9 @@ public class UsersControllers {
 
     // only for admin
     @GetMapping
-    public List<Users> readAllUsers(){
-        return usersService.readAll();
+    public List<Users> readAllUsers(@RequestHeader("loggedInUser") String username){
+        System.out.println(username);
+        return usersService.readAll(username);
     }
 
     @PostMapping
@@ -26,13 +27,13 @@ public class UsersControllers {
         return usersService.create(users);
     }
     @GetMapping("/{id}")
-    public UsersResponseDto readOneUser(@PathVariable Long id){
-        return usersService.readOne(id);
+    public UsersResponseDto readOneUser(@PathVariable Long id, @RequestHeader("loggedInUser") String username){
+        return usersService.readOne(id, username);
     }
 
     @PutMapping("/{id}")
-    public Users updateUser(@PathVariable Long id, @RequestBody Users users){
-        return usersService.update(id, users);
+    public Users updateUser(@PathVariable Long id, @RequestBody Users users, @RequestHeader("loggedInUser") String username){
+        return usersService.update(id, users, username);
     }
 
     //for admin

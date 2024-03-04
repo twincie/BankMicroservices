@@ -1,6 +1,7 @@
 package com.example.bankusers.mapper;
 
 import com.example.bankusers.dto.UsersResponseDto;
+import com.example.bankusers.dto.userDto;
 import com.example.bankusers.entity.Users;
 import com.example.bankusers.external.Wallet;
 
@@ -13,6 +14,16 @@ public class UserMapper {
         usersResponseDto.setEmail(user.getEmail());
         usersResponseDto.setRole(user.getRole());
         usersResponseDto.setWallet(wallet);
+        return usersResponseDto;
+    }
+
+    public static userDto usersMapperDto(Users user){
+        userDto usersResponseDto= new userDto();
+        usersResponseDto.setId(user.getId());
+        usersResponseDto.setUsername(user.getUsername());
+        usersResponseDto.setEmail(user.getEmail());
+        usersResponseDto.setRole(user.getRole());
+        usersResponseDto.setWalletId(user.getWalletId());
         return usersResponseDto;
     }
 }
