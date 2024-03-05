@@ -17,9 +17,8 @@ public class UsersControllers {
 
     // only for admin
     @GetMapping
-    public List<Users> readAllUsers(@RequestHeader("loggedInUser") String username){
-        System.out.println(username);
-        return usersService.readAll(username);
+    public List<Users> readAllUsers(@RequestHeader("loggedInUserId") String userId){
+        return usersService.readAll(userId);
     }
 
     @PostMapping
@@ -27,13 +26,14 @@ public class UsersControllers {
         return usersService.create(users);
     }
     @GetMapping("/{id}")
-    public UsersResponseDto readOneUser(@PathVariable Long id, @RequestHeader("loggedInUser") String username){
-        return usersService.readOne(id, username);
+    public UsersResponseDto readOneUser(@PathVariable Long id, @RequestHeader("loggedInUserId") String userId){
+        System.out.println(userId);
+        return usersService.readOne(id,userId);
     }
 
     @PutMapping("/{id}")
-    public Users updateUser(@PathVariable Long id, @RequestBody Users users, @RequestHeader("loggedInUser") String username){
-        return usersService.update(id, users, username);
+    public Users updateUser(@PathVariable Long id, @RequestBody Users users, @RequestHeader("loggedInUserId") String userId){
+        return usersService.update(id, users, userId);
     }
 
     //for admin

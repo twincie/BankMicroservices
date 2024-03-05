@@ -10,5 +10,6 @@ public class UsersResponseDto {
     private String username;
     private String email;
     private Role role;
-    private Wallet wallet;
+    private Long walletId;
+//    private Wallet wallet;
 }

@@ -31,18 +31,9 @@ public class UsersServiceImpl implements UsersService {
     String walletServiceBaseUrl = "http://BANK-WALLET:8082/api/v1/wallet";
 
     private UsersResponseDto convertToDto(Users user){
-        Wallet wallet = restTemplate.getForObject(walletServiceBaseUrl+"/"+user.getWalletId(), Wallet.class);
-        UsersResponseDto usersResponseDto = UserMapper.userMapperDto(user, wallet);
+        //Wallet wallet = restTemplate.getForObject(walletServiceBaseUrl+"/"+user.getWalletId(), Wallet.class);
+        UsersResponseDto usersResponseDto = UserMapper.userMapperDto(user);
         return usersResponseDto;
-    }
-
-    private Users userAuthorize( String username){
-        Users currentUser = usersRepository.findByUsername(username).orElseThrow(null);
-        Long currentUserId = currentUser.getId();
-        if (usersRepository.existsById(currentUserId)){
-            return currentUser;
-        }
-        return null;
     }
 
     public Users create(Users user){
@@ -58,14 +49,12 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public UsersResponseDto readOne(Long id, String username) {
-        Users currentLoggedInUser = userAuthorize(username);
-        assert currentLoggedInUser != null;
-        if (currentLoggedInUser.getRole() == Role.ADMIN) {
-            //Users user = usersRepository.findById(id).orElseThrow(null);
-            Optional<Users> optionalUsers = usersRepository.findById(id);
-            Users user = new Users();
-            if (optionalUsers.isPresent()) {
+    public UsersResponseDto readOne(Long id, String userId) {
+        Long userIdToLong = Long.parseLong(userId);
+        Optional<Users> optionalUsers = usersRepository.findById(id);
+        if (optionalUsers.isPresent()){
+            if (optionalUsers.get().getRole().equals(Role.USER) && optionalUsers.get().getId().equals(userIdToLong)){
+                Users user = new Users();
                 user.setId(optionalUsers.get().getId());
                 user.setUsername(optionalUsers.get().getUsername());
                 user.setEmail(optionalUsers.get().getEmail());
@@ -73,14 +62,8 @@ public class UsersServiceImpl implements UsersService {
                 user.setRole(optionalUsers.get().getRole());
                 user.setWalletId(optionalUsers.get().getWalletId());
                 return convertToDto(user);
-            } else {
-                return null;
-            }
-        } else if (currentLoggedInUser.getRole() == Role.USER && currentLoggedInUser.getId().equals(id)) {
-            //Users user = usersRepository.findById(id).orElseThrow(null);
-            Optional<Users> optionalUsers = usersRepository.findById(id);
-            Users user = new Users();
-            if (optionalUsers.isPresent()) {
+            } else if (optionalUsers.get().getRole().equals(Role.ADMIN)){
+                Users user = new Users();
                 user.setId(optionalUsers.get().getId());
                 user.setUsername(optionalUsers.get().getUsername());
                 user.setEmail(optionalUsers.get().getEmail());
@@ -96,25 +79,29 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public List<Users> readAll(String username) {
-        Users currentLoggedInUser = userAuthorize(username);
-        assert currentLoggedInUser != null;
-        if (currentLoggedInUser.getRole() == Role.ADMIN){
+    public List<Users> readAll(String userId) {
+        Long userIdToLong = Long.parseLong(userId);
+        Optional<Users> optionalUsers = usersRepository.findById(userIdToLong);
+        if (optionalUsers.isPresent() && optionalUsers.get().getRole().equals(Role.ADMIN)){
             return usersRepository.findAll();
         }
         return null;
     }
 
     @Override
-    public Users update(Long id, Users updater, String username) {
-        Users currentLoggedInUser = userAuthorize(username);
-        assert currentLoggedInUser != null;
-        if (currentLoggedInUser.getRole() == Role.USER && currentLoggedInUser.getId().equals(id)) {
-            updater.setId(id);
-            return usersRepository.save(updater);
-        } else if(currentLoggedInUser.getRole() == Role.ADMIN){
-            updater.setId(id);
-            return usersRepository.save(updater);
+    public Users update(Long id, Users updater, String userId) {
+        Long userIdToLong = Long.parseLong(userId);
+        Optional<Users> optionalUsers = usersRepository.findById(id);
+        if (optionalUsers.isPresent()){
+            if (optionalUsers.get().getRole().equals(Role.USER) && optionalUsers.get().getId().equals(userIdToLong)){
+                updater.setId(id);
+                return usersRepository.save(updater);
+            } else if (optionalUsers.get().getRole().equals(Role.ADMIN)){
+                updater.setId(id);
+                return usersRepository.save(updater);
+            } else {
+                return  null;
+            }
         }
         return null;
     }

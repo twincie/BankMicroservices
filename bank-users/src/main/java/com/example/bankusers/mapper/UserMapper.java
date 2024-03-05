@@ -7,18 +7,8 @@ import com.example.bankusers.external.Wallet;
 
 public class UserMapper {
 
-    public static UsersResponseDto userMapperDto(Users user, Wallet wallet){
+    public static UsersResponseDto userMapperDto(Users user){
         UsersResponseDto usersResponseDto = new UsersResponseDto();
-        usersResponseDto.setId(user.getId());
-        usersResponseDto.setUsername(user.getUsername());
-        usersResponseDto.setEmail(user.getEmail());
-        usersResponseDto.setRole(user.getRole());
-        usersResponseDto.setWallet(wallet);
-        return usersResponseDto;
-    }
-
-    public static userDto usersMapperDto(Users user){
-        userDto usersResponseDto= new userDto();
         usersResponseDto.setId(user.getId());
         usersResponseDto.setUsername(user.getUsername());
         usersResponseDto.setEmail(user.getEmail());
