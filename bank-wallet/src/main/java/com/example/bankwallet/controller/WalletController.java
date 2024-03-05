@@ -25,13 +25,13 @@ public class WalletController {
     }
 
     @GetMapping("/{walletId}")
-    public WalletDto readOneWallet(@PathVariable Long walletId){
-        return walletService.readOne(walletId);
+    public WalletDto readOneWallet(@PathVariable Long walletId, @RequestHeader("loggedInWalletId") String walletid){
+        return walletService.readOne(walletId, walletid);
     }
 
     @GetMapping
-    public List<Wallet> readAllWallets(){
-        return walletService.readAll();
+    public List<Wallet> readAllWallets(@RequestHeader("loggedInWalletId") String walletId){
+        return walletService.readAll(walletId);
     }
 
     @PutMapping("/{walletId}")
@@ -45,26 +45,26 @@ public class WalletController {
     }
 
     @PutMapping("/{walletId}/topup")
-    public ResponseEntity<String> topUpWallet(@PathVariable Long walletId, @RequestBody Map<String, BigDecimal> request){
+    public ResponseEntity<String> topUpWallet(@PathVariable Long walletId, @RequestBody Map<String, BigDecimal> request, @RequestHeader("loggedInWalletId") String walletid){
         BigDecimal amount = request.get("amount");
-        walletService.topup(walletId, amount);
+        walletService.topup(walletId, amount, walletid);
         return new ResponseEntity<>("Topup Successful", HttpStatus.OK);
     }
 
     @PutMapping("/{walletId}/withdraw")
-    public ResponseEntity<String> withdrawWallet(@PathVariable Long walletId, @RequestBody Map<String, BigDecimal> request){
+    public ResponseEntity<String> withdrawWallet(@PathVariable Long walletId, @RequestBody Map<String, BigDecimal> request, @RequestHeader("loggedInWalletId") String walletid){
         BigDecimal amount = request.get("amount");
-        walletService.withdraw(walletId, amount);
+        walletService.withdraw(walletId, amount, walletid);
         return new ResponseEntity<>("Withdraw Successful",HttpStatus.OK);
     }
 
     @PutMapping("/{walletId}/transfer")
-    public ResponseEntity<String> transferWallet(@PathVariable Long walletId, @RequestBody Map<String, Object> request){
+    public ResponseEntity<String> transferWallet(@PathVariable Long walletId, @RequestBody Map<String, Object> request, @RequestHeader("loggedInWalletId") String walletid){
         Object amountObj = request.get("amount");
         Object receiverAccountNumberObj = request.get("accountNumber");
         BigDecimal amount = new BigDecimal(amountObj.toString());
         String receiverAccountNumber = receiverAccountNumberObj.toString();
-        boolean isTransfer = walletService.transfer(walletId, amount, receiverAccountNumber);
+        boolean isTransfer = walletService.transfer(walletId, amount, receiverAccountNumber, walletid);
         if (isTransfer){
             return new ResponseEntity<>("Transfer Successful", HttpStatus.OK);
         }
