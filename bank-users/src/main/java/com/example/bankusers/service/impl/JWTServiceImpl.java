@@ -1,5 +1,6 @@
 package com.example.bankusers.service.impl;
 
+import com.example.bankusers.entity.Users;
 import com.example.bankusers.service.JWTService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,16 +20,20 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JWTServiceImpl implements JWTService {
 
-    public String generateToken(UserDetails userDetails){
-        return Jwts.builder().setSubject(userDetails.getUsername())
+    public String generateToken(Users users){
+        return Jwts.builder().setSubject(users.getUsername())
+                .claim("userId", users.getId())
+                .claim("walletId", users.getWalletId())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSigninKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails){
-        return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
+    public String generateRefreshToken(Map<String, Object> extraClaims, Users users){
+        return Jwts.builder().setClaims(extraClaims).setSubject(users.getUsername())
+                .claim("userId", users.getId())
+                .claim("walletId", users.getWalletId())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 604800000))
                 .signWith(getSigninKey(), SignatureAlgorithm.HS256)

@@ -30,6 +30,14 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Integer extractUserId(String token){
+        return extractClaim(token, claims -> claims.get("userId", Integer.class));
+    }
+
+    public Integer extractWalletId(String token){
+        return extractClaim(token, claims -> claims.get("walletId", Integer.class));
+    }
+
     private Key getSigninKey(){
         byte[] key = Decoders.BASE64.decode("413F4428472B4B6250655368566D597033733676397924422645294B4D6351");
         return Keys.hmacShaKeyFor(key);

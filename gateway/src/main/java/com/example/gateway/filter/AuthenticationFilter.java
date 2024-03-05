@@ -38,12 +38,18 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     authHeader = authHeader.substring(7);
                     System.out.println(authHeader);
                 }
+//                Integer intUserId = jwtUtil.extractUserId(authHeader);
+//                String userId = intUserId.toString();
+//                Integer intWalletId = jwtUtil.extractWalletId(authHeader);
+//                String walletId = intWalletId.toString();
                 try{
                     //restTemplate.getForObject("http://localhost:8081/api/v1/auth/validate", String.class);
                     jwtUtil.validateToken(authHeader);
                     request= exchange.getRequest()
                             .mutate()
                             .header("loggedInUser", jwtUtil.extractUserName(authHeader))
+                            .header("loggedInUserId", jwtUtil.extractUserId(authHeader).toString())
+                            .header("loggedInWalletId", jwtUtil.extractWalletId(authHeader).toString())
                             .build();
 
                 } catch (Exception e){
