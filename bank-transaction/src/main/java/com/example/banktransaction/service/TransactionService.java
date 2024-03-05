@@ -45,11 +45,23 @@ public class TransactionService {
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    public  List<Transaction> readOneUserTransactions(Long walletId){
-        return transactionRepository.findByWalletId(walletId);
+    public  List<Transaction> readOneUserTransactions(Long walletId, String walletid){
+        Long walletIdToLong = Long.parseLong(walletid);
+        List<Transaction> transactions = transactionRepository.findByWalletId(walletId);
+        if (walletId.equals(walletIdToLong)){
+            return transactions;
+        }
+        return null;
     }
+
     public List<Transaction> readAll(){
-        return transactionRepository.findAll();
+//        Long walletIdToLong = Long.parseLong(walletId);
+//        Transaction transaction = transactionRepository.findByAccountNumber("1000000000");
+//        if(transaction.getWalletId().equals(walletIdToLong)){
+//            return transactionRepository.findAll();
+//        }
+        return null;
+
     }
     public Transaction update(Long walletId, Long transactionId, Transaction updater){
         if(doesWalletExist(walletId) && transactionRepository.existsById(transactionId)){

@@ -29,8 +29,8 @@ public class TransactionController {
         return transactionService.readOne(walletId,transactionId);
     }
     @GetMapping
-    public List<Transaction> readAllUserTransactions(@RequestParam Long walletId){
-        return transactionService.readOneUserTransactions(walletId);
+    public List<Transaction> readAllUserTransactions(@RequestParam Long walletId, @RequestHeader("loggedInWalletId") String walletid){
+        return transactionService.readOneUserTransactions(walletId, walletid);
     }
     @PutMapping("/{transactionId}")
     public Transaction updateTransaction(@RequestParam Long walletId, @PathVariable Long transactionId, @RequestBody Transaction transaction){
