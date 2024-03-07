@@ -25,19 +25,23 @@ public class TransactionController {
         return transactionService.readAll();
     }
     @GetMapping("/{transactionId}")
-    public ResponseEntity<Optional<Transaction>> readOneTransaction(@RequestParam Long walletId, @PathVariable Long transactionId){
-        return transactionService.readOne(walletId,transactionId);
+    public ResponseEntity<Optional<Transaction>> readOneTransaction(@RequestParam Long walletId, @PathVariable Long transactionId, @RequestHeader("loggedInWalletId") String walletid){
+        return transactionService.readOne(walletId,transactionId, walletid);
     }
     @GetMapping
     public List<Transaction> readAllUserTransactions(@RequestParam Long walletId, @RequestHeader("loggedInWalletId") String walletid){
         return transactionService.readOneUserTransactions(walletId, walletid);
     }
+    @GetMapping("/all/wallet")
+    public List<Transaction> walletReadAllUserTransactions(@RequestParam Long walletId){
+        return transactionService.walletReadOneUserTransactions(walletId);
+    }
     @PutMapping("/{transactionId}")
-    public Transaction updateTransaction(@RequestParam Long walletId, @PathVariable Long transactionId, @RequestBody Transaction transaction){
-        return transactionService.update(walletId, transactionId, transaction);
+    public Transaction updateTransaction(@RequestParam Long walletId, @PathVariable Long transactionId, @RequestBody Transaction transaction, @RequestHeader("loggedInWalletId") String walletid){
+        return transactionService.update(walletId, transactionId, transaction, walletid);
     }
     @DeleteMapping("/{transactionId}")
-    public void deleteTransaction(@RequestParam Long walletId, @PathVariable Long transactionId){
-        transactionService.delete(walletId, transactionId);
+    public void deleteTransaction(@RequestParam Long walletId, @PathVariable Long transactionId, @RequestHeader("loggedInWalletId") String walletid){
+        transactionService.delete(walletId, transactionId, walletid);
     }
 }

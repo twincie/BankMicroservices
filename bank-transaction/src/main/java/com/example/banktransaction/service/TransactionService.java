@@ -31,15 +31,16 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public boolean doesWalletExist(Long walletId) {
-        Optional<Wallet> wallet = Optional.ofNullable(restTemplate.getForObject(walletServiceBaseUrl + "/" + walletId, Wallet.class));
-        if (wallet.isPresent()){
-            return true;
-        }
-        return false;
-    }
-    public ResponseEntity<Optional<Transaction>> readOne(Long walletId, Long transactionId){
-        if(doesWalletExist(walletId) && transactionRepository.existsById(transactionId)){
+//    public boolean doesWalletExist(Long walletId) {
+//        Optional<Wallet> wallet = Optional.ofNullable(restTemplate.getForObject(walletServiceBaseUrl + "/" + walletId, Wallet.class));
+//        if (wallet.isPresent()){
+//            return true;
+//        }
+//        return false;
+//    }
+    public ResponseEntity<Optional<Transaction>> readOne(Long walletId, Long transactionId, String walletid){
+        Long walletIdToLong = Long.parseLong(walletid);
+        if(walletId.equals(walletIdToLong) && transactionRepository.existsById(transactionId)){
             return new ResponseEntity<>(transactionRepository.findById(transactionId), HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -63,16 +64,22 @@ public class TransactionService {
         return null;
 
     }
-    public Transaction update(Long walletId, Long transactionId, Transaction updater){
-        if(doesWalletExist(walletId) && transactionRepository.existsById(transactionId)){
+    public Transaction update(Long walletId, Long transactionId, Transaction updater, String walletid){
+        Long walletIdToLong = Long.parseLong(walletid);
+        if(walletId.equals(walletIdToLong) && transactionRepository.existsById(transactionId)){
             updater.setId(transactionId);
             return transactionRepository.save(updater);
         }
         return null;
     }
-    public void delete(Long walletId, Long transactionId){
-        if(doesWalletExist(walletId) && transactionRepository.existsById(transactionId)) {
+    public void delete(Long walletId, Long transactionId, String walletid){
+        Long walletIdToLong = Long.parseLong(walletid);
+        if(walletId.equals(walletIdToLong) && transactionRepository.existsById(transactionId)) {
             transactionRepository.deleteById(transactionId);
         }
+    }
+
+    public List<Transaction> walletReadOneUserTransactions(Long walletId) {
+        return  transactionRepository.findByWalletId(walletId);
     }
 }

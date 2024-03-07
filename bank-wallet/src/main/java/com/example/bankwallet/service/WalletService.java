@@ -35,7 +35,7 @@ public class WalletService {
     }
 
     private WalletDto convertToDto(Wallet wallet){
-        ResponseEntity<List<Transaction>> transaction = restTemplate.exchange(transactionServiceBaseUrl+"?walletId=" + wallet.getId(), HttpMethod.GET, null, new ParameterizedTypeReference<List<Transaction>>(){});
+        ResponseEntity<List<Transaction>> transaction = restTemplate.exchange(transactionServiceBaseUrl+"/all/wallet?walletId=" + wallet.getId(), HttpMethod.GET, null, new ParameterizedTypeReference<List<Transaction>>(){});
         List<Transaction> transactions= transaction.getBody();
         WalletDto walletDto = WalletMapper.walletMapperDto(wallet, transactions);
         return walletDto;
