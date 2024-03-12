@@ -42,6 +42,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 //                String userId = intUserId.toString();
 //                Integer intWalletId = jwtUtil.extractWalletId(authHeader);
 //                String walletId = intWalletId.toString();
+                String role = jwtUtil.extractRole(authHeader);
+                System.out.println(role);
                 try{
                     //restTemplate.getForObject("http://localhost:8081/api/v1/auth/validate", String.class);
                     jwtUtil.validateToken(authHeader);
@@ -50,6 +52,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                             .header("loggedInUser", jwtUtil.extractUserName(authHeader))
                             .header("loggedInUserId", jwtUtil.extractUserId(authHeader).toString())
                             .header("loggedInWalletId", jwtUtil.extractWalletId(authHeader).toString())
+                            .header("role", jwtUtil.extractRole(authHeader))
                             .build();
 
                 } catch (Exception e){

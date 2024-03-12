@@ -38,6 +38,10 @@ public class JwtUtil {
         return extractClaim(token, claims -> claims.get("walletId", Integer.class));
     }
 
+    public String extractRole(String token){
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
     private Key getSigninKey(){
         byte[] key = Decoders.BASE64.decode("413F4428472B4B6250655368566D597033733676397924422645294B4D6351");
         return Keys.hmacShaKeyFor(key);

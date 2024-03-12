@@ -49,61 +49,32 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public UsersResponseDto readOne(Long id, String userId) {
-        Long userIdToLong = Long.parseLong(userId);
-        Optional<Users> optionalUsers = usersRepository.findById(id);
-        if (optionalUsers.isPresent()){
-            if (optionalUsers.get().getRole().equals(Role.USER) && optionalUsers.get().getId().equals(userIdToLong)){
-                Users user = new Users();
-                user.setId(optionalUsers.get().getId());
-                user.setUsername(optionalUsers.get().getUsername());
-                user.setEmail(optionalUsers.get().getEmail());
-                user.setPassword(optionalUsers.get().getPassword());
-                user.setRole(optionalUsers.get().getRole());
-                user.setWalletId(optionalUsers.get().getWalletId());
-                return convertToDto(user);
-            } else if (optionalUsers.get().getRole().equals(Role.ADMIN)){
-                Users user = new Users();
-                user.setId(optionalUsers.get().getId());
-                user.setUsername(optionalUsers.get().getUsername());
-                user.setEmail(optionalUsers.get().getEmail());
-                user.setPassword(optionalUsers.get().getPassword());
-                user.setRole(optionalUsers.get().getRole());
-                user.setWalletId(optionalUsers.get().getWalletId());
-                return convertToDto(user);
-            } else {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<Users> readAll(String userId) {
+    public UsersResponseDto readOne(String userId) {
         Long userIdToLong = Long.parseLong(userId);
         Optional<Users> optionalUsers = usersRepository.findById(userIdToLong);
-        if (optionalUsers.isPresent() && optionalUsers.get().getRole().equals(Role.ADMIN)){
-            return usersRepository.findAll();
+        if (optionalUsers.isPresent()){
+            Users user = new Users();
+            user.setId(optionalUsers.get().getId());
+            user.setUsername(optionalUsers.get().getUsername());
+            user.setEmail(optionalUsers.get().getEmail());
+            user.setPassword(optionalUsers.get().getPassword());
+            user.setRole(optionalUsers.get().getRole());
+            user.setWalletId(optionalUsers.get().getWalletId());
+            return convertToDto(user);
         }
         return null;
     }
 
     @Override
-    public Users update(Long id, Users updater, String userId) {
+    public List<Users> readAll() {
+        return usersRepository.findAll();
+    }
+
+    @Override
+    public Users update(Users updater, String userId) {
         Long userIdToLong = Long.parseLong(userId);
-        Optional<Users> optionalUsers = usersRepository.findById(id);
-        if (optionalUsers.isPresent()){
-            if (optionalUsers.get().getRole().equals(Role.USER) && optionalUsers.get().getId().equals(userIdToLong)){
-                updater.setId(id);
-                return usersRepository.save(updater);
-            } else if (optionalUsers.get().getRole().equals(Role.ADMIN)){
-                updater.setId(id);
-                return usersRepository.save(updater);
-            } else {
-                return  null;
-            }
-        }
-        return null;
+        updater.setId(userIdToLong);
+        return usersRepository.save(updater);
     }
 
     @Override
