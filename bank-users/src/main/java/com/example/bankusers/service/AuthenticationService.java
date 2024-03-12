@@ -1,15 +1,11 @@
 package com.example.bankusers.service;
 
 
-import com.example.bankusers.dto.JwtAuthenticationResponse;
-import com.example.bankusers.dto.RefreshTokenRequest;
-import com.example.bankusers.dto.SignUpRequest;
-import com.example.bankusers.dto.SigninRequest;
-import com.example.bankusers.entity.Users;
+import com.example.bankusers.dto.*;
 
 public interface AuthenticationService {
 
-    Users signup(SignUpRequest signUpRequest);
+    UsersResponseDto signup(SignUpRequest signUpRequest);
 
     JwtAuthenticationResponse signin(SigninRequest signinRequest);
 

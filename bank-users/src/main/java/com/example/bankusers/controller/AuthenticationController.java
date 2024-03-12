@@ -1,9 +1,6 @@
 package com.example.bankusers.controller;
 
-import com.example.bankusers.dto.JwtAuthenticationResponse;
-import com.example.bankusers.dto.RefreshTokenRequest;
-import com.example.bankusers.dto.SignUpRequest;
-import com.example.bankusers.dto.SigninRequest;
+import com.example.bankusers.dto.*;
 import com.example.bankusers.entity.Users;
 import com.example.bankusers.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +14,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Users> signup(@RequestBody SignUpRequest signUpRequest){
+    public ResponseEntity<UsersResponseDto> signup(@RequestBody SignUpRequest signUpRequest){
         return ResponseEntity.ok(authenticationService.signup(signUpRequest));
     }
 

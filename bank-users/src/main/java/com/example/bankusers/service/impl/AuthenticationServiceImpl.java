@@ -1,11 +1,9 @@
 package com.example.bankusers.service.impl;
 
-import com.example.bankusers.dto.JwtAuthenticationResponse;
-import com.example.bankusers.dto.RefreshTokenRequest;
-import com.example.bankusers.dto.SignUpRequest;
-import com.example.bankusers.dto.SigninRequest;
+import com.example.bankusers.dto.*;
 import com.example.bankusers.entity.Role;
 import com.example.bankusers.entity.Users;
+import com.example.bankusers.mapper.UserMapper;
 import com.example.bankusers.repository.UsersRepository;
 import com.example.bankusers.service.AuthenticationService;
 import com.example.bankusers.service.JWTService;
@@ -36,8 +34,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Autowired
     private JWTService jwtService;
 
+    private UsersResponseDto convertToDto(Users user){
+        //Wallet wallet = restTemplate.getForObject(walletServiceBaseUrl+"/"+user.getWalletId(), Wallet.class);
+        UsersResponseDto usersResponseDto = UserMapper.userMapperDto(user);
+        return usersResponseDto;
+    }
 
-    public Users signup(SignUpRequest signUpRequest){
+    public UsersResponseDto signup(SignUpRequest signUpRequest){
         Users users = new Users();
 
         users.setEmail(signUpRequest.getEmail());
@@ -45,7 +48,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         users.setRole(Role.USER);
         users.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-        return usersService.create(users);
+        Users user = usersService.create(users);
+        return convertToDto(user);
     }
 
     public JwtAuthenticationResponse signin(SigninRequest signinRequest){
