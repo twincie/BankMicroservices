@@ -38,30 +38,28 @@ public class TransactionService {
 //        }
 //        return false;
 //    }
-    public ResponseEntity<Optional<Transaction>> readOne(Long walletId, Long transactionId, String walletid){
-        Long walletIdToLong = Long.parseLong(walletid);
-        if(walletId.equals(walletIdToLong) && transactionRepository.existsById(transactionId)){
-            return new ResponseEntity<>(transactionRepository.findById(transactionId), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    public Transaction readOne(Long transactionId, String walletId){
+        Long walletIdToLong = Long.parseLong(walletId);
+        return transactionRepository.findByIdAndWalletId(transactionId, walletIdToLong);
+//        if(transactionRepository.existsByIdAndWalletId(transactionId)){
+//            return transactionRepository.findById(transactionId).orElseThrow(null);
+//        }
+//        return null;
     }
 
-    public  List<Transaction> readOneUserTransactions(Long walletId, String walletid){
-        Long walletIdToLong = Long.parseLong(walletid);
-        List<Transaction> transactions = transactionRepository.findByWalletId(walletId);
-        if (walletId.equals(walletIdToLong)){
-            return transactions;
-        }
-        return null;
+    public  List<Transaction> readOneUserTransactions(String walletId){
+        Long walletIdToLong = Long.parseLong(walletId);
+        List<Transaction> transactions = transactionRepository.findByWalletId(walletIdToLong);
+        return transactions;
+
     }
 
     public List<Transaction> readAll(){
 //        Long walletIdToLong = Long.parseLong(walletId);
 //        Transaction transaction = transactionRepository.findByAccountNumber("1000000000");
 //        if(transaction.getWalletId().equals(walletIdToLong)){
-//            return transactionRepository.findAll();
+            return transactionRepository.findAll();
 //        }
-        return null;
 
     }
     public Transaction update(Long walletId, Long transactionId, Transaction updater, String walletid){

@@ -85,7 +85,7 @@ public class WalletService {
                 transaction.setType(TransactionType.TOPUP);
                 transaction.setWalletId(walletIdToLong);
                 restTemplate.postForObject(transactionServiceBaseUrl+"?walletId=" + wallet.getId(), transaction ,Transaction.class);
-                return "Withdrawal Successful";
+                return "Topup Successful";
             }
             return "amount too small";
         }

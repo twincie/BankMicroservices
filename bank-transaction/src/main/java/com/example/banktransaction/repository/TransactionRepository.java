@@ -10,4 +10,6 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     List<Transaction> findByWalletId(Long id);
+
+    Transaction findByIdAndWalletId(Long Id, Long walletId);
 }

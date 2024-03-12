@@ -79,10 +79,10 @@ public class WalletController {
         String walletResponse = walletService.topup(amount, walletId);
         WalletDto wallet = walletService.readOne(walletId);
 //        return new ResponseEntity<>("Topup Successful", HttpStatus.OK);
-        if (walletResponse.equals("Withdrawal Successful")){
+        if (walletResponse.equals("Topup Successful")){
             return ResponseEntity.ok(new Response(HttpStatus.OK, walletResponse, wallet));
         }
-        return ResponseEntity.ok(new Response(HttpStatus.OK, walletResponse, wallet));
+        return ResponseEntity.ok(new Response(HttpStatus.FORBIDDEN, walletResponse, wallet));
     }
 
     @PutMapping("/withdraw")
