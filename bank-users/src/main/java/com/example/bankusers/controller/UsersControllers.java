@@ -36,7 +36,7 @@ public class UsersControllers {
     @GetMapping
     public ResponseEntity<Response> readAllUsers(@RequestHeader("role") String role){
         System.out.println(role);
-        if(role == null || !role.equals("admin")){
+        if(role == null || !role.equalsIgnoreCase("admin")){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).
                     body(new Response(HttpStatus.FORBIDDEN, "User does not have permission to access this resource."));
         }

@@ -41,15 +41,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public UsersResponseDto signup(SignUpRequest signUpRequest){
-        if (!usersRepository.existsByUsername(signUpRequest.getUsername()) || !usersRepository.existsByEmail(signUpRequest.getEmail())){
-            Users users = new Users();
-            users.setEmail(signUpRequest.getEmail());
-            users.setUsername(signUpRequest.getUsername());
-            users.setRole(Role.USER);
-            users.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+        if (!usersRepository.existsByUsername(signUpRequest.getUsername())){
+            if (!usersRepository.existsByEmail(signUpRequest.getEmail())) {
+                Users users = new Users();
+                users.setEmail(signUpRequest.getEmail());
+                users.setUsername(signUpRequest.getUsername());
+                users.setRole(Role.USER);
+                users.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-            Users user = usersService.create(users);
-            return convertToDto(user);
+                Users user = usersService.create(users);
+                return convertToDto(user);
+            }
+            return null;
         }
         return null;
     }

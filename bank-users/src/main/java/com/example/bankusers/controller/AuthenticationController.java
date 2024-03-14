@@ -12,7 +12,35 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
+
     private final AuthenticationService authenticationService;
+
+    private int calculatePasswordStrength(String password) {
+        int strength = 0;
+        boolean hasUppercase = false;
+        boolean hasLowercase = false;
+        boolean hasSymbol = false;
+        boolean hasNumber = false;
+        // Iterate through each character of the password
+        for (char ch : password.toCharArray()) {
+            if (Character.isUpperCase(ch)) {
+                hasUppercase = true;
+            } else if (Character.isLowerCase(ch)) {
+                hasLowercase = true;
+            } else if (Character.isDigit(ch)) {
+                hasNumber = true;
+            } else {
+                hasSymbol = true;
+            }
+        }
+        // Increment strength for each requirement met
+        if (hasUppercase) strength++;
+        if (hasLowercase) strength++;
+        if (hasNumber) strength++;
+        if (hasSymbol) strength++;
+
+        return strength;
+    }
 
     static class Response{
         private final HttpStatus status;
@@ -33,11 +61,17 @@ public class AuthenticationController {
 
     @PostMapping("/signup")
     public ResponseEntity<Response> signup(@RequestBody SignUpRequest signUpRequest){
-        UsersResponseDto usersResponseDto = authenticationService.signup(signUpRequest);
-        if (usersResponseDto != null){
-            return ResponseEntity.ok(new Response(HttpStatus.OK, usersResponseDto));
+        String password = signUpRequest.getPassword();
+        int strength = calculatePasswordStrength(password);
+        if (strength < 3) {
+            return ResponseEntity.ok(new Response(HttpStatus.FORBIDDEN, "Weak password"));
+        } else {
+            UsersResponseDto usersResponseDto = authenticationService.signup(signUpRequest);
+            if (usersResponseDto != null) {
+                return ResponseEntity.ok(new Response(HttpStatus.OK, usersResponseDto));
+            }
+            return ResponseEntity.ok(new Response(HttpStatus.FORBIDDEN, "User Already Exists"));
         }
-        return ResponseEntity.ok(new Response(HttpStatus.FORBIDDEN, "User Already Exists"));
     }
 
     @PostMapping("/signin")

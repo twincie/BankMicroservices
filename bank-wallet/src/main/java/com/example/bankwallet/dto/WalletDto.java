@@ -11,5 +11,4 @@ public class WalletDto {
     private Long id;
     private String accountNumber;
     private BigDecimal amount;
-    private List<Transaction> transaction;
 }

@@ -1,5 +1,6 @@
 package com.example.banktransaction.service;
 
+import com.example.banktransaction.entity.Response;
 import com.example.banktransaction.entity.Transaction;
 import com.example.banktransaction.external.Wallet;
 import com.example.banktransaction.repository.TransactionRepository;
@@ -38,41 +39,64 @@ public class TransactionService {
 //        }
 //        return false;
 //    }
-    public Transaction readOne(Long transactionId, String walletId){
+    public Response readOne(Long transactionId, String walletId){
+        Response response = new Response();
         Long walletIdToLong = Long.parseLong(walletId);
-        return transactionRepository.findByIdAndWalletId(transactionId, walletIdToLong);
-//        if(transactionRepository.existsByIdAndWalletId(transactionId)){
-//            return transactionRepository.findById(transactionId).orElseThrow(null);
-//        }
-//        return null;
-    }
-
-    public  List<Transaction> readOneUserTransactions(String walletId){
-        Long walletIdToLong = Long.parseLong(walletId);
-        List<Transaction> transactions = transactionRepository.findByWalletId(walletIdToLong);
-        return transactions;
-
-    }
-
-    public List<Transaction> readAll(){
-//        Long walletIdToLong = Long.parseLong(walletId);
-//        Transaction transaction = transactionRepository.findByAccountNumber("1000000000");
-//        if(transaction.getWalletId().equals(walletIdToLong)){
-            return transactionRepository.findAll();
-//        }
-
-    }
-    public Transaction update(Long walletId, Long transactionId, Transaction updater, String walletid){
-        Long walletIdToLong = Long.parseLong(walletid);
-        if(walletId.equals(walletIdToLong) && transactionRepository.existsById(transactionId)){
-            updater.setId(transactionId);
-            return transactionRepository.save(updater);
+        Transaction transaction = transactionRepository.findByIdAndWalletId(transactionId, walletIdToLong);
+        if (transaction != null) {
+            response.setStatus(HttpStatus.OK);
+            response.setMessage("Successfully retrieved Transactions");
+            response.setBody(transaction);
+            return response;
         }
-        return null;
+        response.setStatus(HttpStatus.FORBIDDEN);
+        response.setMessage("ID cannot be found : Check if ID is correct");
+        return response;
     }
-    public void delete(Long walletId, Long transactionId, String walletid){
-        Long walletIdToLong = Long.parseLong(walletid);
-        if(walletId.equals(walletIdToLong) && transactionRepository.existsById(transactionId)) {
+
+    public  Response readOneUserTransactions(String walletId){
+        Long walletIdToLong = Long.parseLong(walletId);
+        Response response = new Response();
+        List<Transaction> transactions = transactionRepository.findByWalletId(walletIdToLong);
+        response.setStatus(HttpStatus.OK);
+        response.setMessage("Successfully retrieved Transactions");
+        response.setBody(transactions);
+        return response;
+    }
+
+    public Response readAll(String role){
+        Response response = new Response();
+        if(role.equalsIgnoreCase("admin")){
+            List<Transaction> transactionRes = transactionRepository.findAll();
+            response.setStatus(HttpStatus.OK);
+            response.setMessage("Successfully retrieved all Transactions");
+            response.setBody(transactionRes);
+            return response;
+        }
+        response.setStatus(HttpStatus.FORBIDDEN);
+        response.setMessage("cannot access Resource");
+        return response;
+
+    }
+    public Response update(String walletId, Long transactionId, Transaction updater){
+        Long walletIdToLong = Long.parseLong(walletId);
+        Response response = new Response();
+        if(transactionRepository.existsByIdAndWalletId(transactionId, walletIdToLong)){
+            updater.setId(transactionId);
+            Transaction transaction = transactionRepository.save(updater);
+            response.setStatus(HttpStatus.OK);
+            response.setMessage("Successfully Updated Transactions");
+            response.setBody(transaction);
+            return response;
+
+        }
+        response.setStatus(HttpStatus.OK);
+        response.setMessage("Didnt update transaction successfully");
+        return response;
+    }
+    public void delete(String walletId, Long transactionId){
+        Long walletIdToLong = Long.parseLong(walletId);
+        if(transactionRepository.existsByIdAndWalletId(transactionId, walletIdToLong)) {
             transactionRepository.deleteById(transactionId);
         }
     }
