@@ -2,16 +2,23 @@ package com.example.bankusers.controller;
 
 import com.example.bankusers.dto.*;
 import com.example.bankusers.entity.Users;
+import com.example.bankusers.repository.UsersRepository;
 import com.example.bankusers.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.naming.AuthenticationException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
+
+    @Autowired
+    UsersRepository usersRepository;
 
     private final AuthenticationService authenticationService;
 
@@ -75,8 +82,18 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<JwtAuthenticationResponse> signin(@RequestBody SigninRequest signinRequest){
-        return ResponseEntity.ok(authenticationService.signin(signinRequest));
+    public ResponseEntity<Response> signin(@RequestBody SigninRequest signinRequest){
+        if (usersRepository.existsByUsername(signinRequest.getUsername())){
+            try{
+            JwtAuthenticationResponse jwtAuthenticationResponse = authenticationService.signin(signinRequest);
+                return ResponseEntity.ok(new Response(HttpStatus.OK, jwtAuthenticationResponse));
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new Response(HttpStatus.FORBIDDEN, "Wrong Password"));
+            }
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new Response(HttpStatus.FORBIDDEN, "Username doesnt exist"));
     }
 
     @GetMapping("/validate")
