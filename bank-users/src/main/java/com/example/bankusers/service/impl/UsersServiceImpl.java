@@ -1,7 +1,9 @@
 package com.example.bankusers.service.impl;
 
+import com.example.bankusers.controller.UsersControllers;
 import com.example.bankusers.dto.UsersResponseDto;
 import com.example.bankusers.dto.userDto;
+import com.example.bankusers.entity.Response;
 import com.example.bankusers.entity.Role;
 import com.example.bankusers.entity.Users;
 import com.example.bankusers.external.Wallet;
@@ -17,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,32 +52,71 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public UsersResponseDto readOne(String userId) {
-        Long userIdToLong = Long.parseLong(userId);
-        Optional<Users> optionalUsers = usersRepository.findById(userIdToLong);
-        if (optionalUsers.isPresent()){
-            Users user = new Users();
-            user.setId(optionalUsers.get().getId());
-            user.setUsername(optionalUsers.get().getUsername());
-            user.setEmail(optionalUsers.get().getEmail());
-            user.setPassword(optionalUsers.get().getPassword());
-            user.setRole(optionalUsers.get().getRole());
-            user.setWalletId(optionalUsers.get().getWalletId());
-            return convertToDto(user);
+    public Response readOne(String userId) {
+        try {
+            Response response = new Response();
+            Long userIdToLong = Long.parseLong(userId);
+            Users user = usersRepository.findById(userIdToLong).orElseThrow(null);
+            response.setStatus(HttpStatus.OK);
+            response.setMessage("Details of user");
+            response.setBody(convertToDto(user));
+            return response;
+        } catch (Exception e) {
+            Response response = new Response();
+            System.out.println("Error: "+ e);
+            response.setStatus(HttpStatus.FORBIDDEN);
+            response.setMessage("an exception occured, wait a while.");
+            return response;
         }
-        return null;
+
     }
 
     @Override
-    public List<Users> readAll() {
-        return usersRepository.findAll();
+    public Response readAll(String role ) {
+        if(role == null || !role.equalsIgnoreCase("admin")){
+            return new Response(HttpStatus.FORBIDDEN,
+                    "User does not have permission to access this resource.", null);
+        }
+        List<Users> usersList = usersRepository.findAll();
+        List<UsersResponseDto> usersDtoList = new ArrayList<>();
+        for (Users user : usersList) {
+            usersDtoList.add(convertToDto(user));
+        }
+        return new Response(HttpStatus.OK,
+                "List of all Users", usersDtoList);
     }
 
     @Override
-    public Users update(Users updater, String userId) {
+    public Response update(Users updater, String userId) {
+//        Long userIdToLong = Long.parseLong(userId);
+//        updater.setId(userIdToLong);
+//        Users users = usersRepository.save(updater);
+//        return new Response(HttpStatus.OK,
+//                "User Updated Successfully ", users);
         Long userIdToLong = Long.parseLong(userId);
-        updater.setId(userIdToLong);
-        return usersRepository.save(updater);
+        Optional<Users> optionalUser = usersRepository.findById(userIdToLong);
+        if (optionalUser.isPresent()) {
+            Users existingUser = optionalUser.get();
+            // Update non-null fields from updater
+            if (updater.getFirstName() != null) {
+                existingUser.setFirstName(updater.getFirstName());
+            }
+            if (updater.getLastName() != null) {
+                existingUser.setLastName(updater.getLastName());
+            }
+            if (updater.getGender() != null) {
+                existingUser.setGender(updater.getGender());
+            }
+            if (updater.getDateOfBirth() != null) {
+                existingUser.setDateOfBirth(updater.getDateOfBirth());
+            }
+            usersRepository.save(existingUser);
+            Users updatedUser = usersRepository.findById(userIdToLong).orElseThrow(null);
+            UsersResponseDto user = convertToDto(updatedUser);
+            return new Response(HttpStatus.OK, "User updated successfully", user);
+        } else {
+            return new Response(HttpStatus.NOT_FOUND, "User not found", null);
+        }
     }
 
     @Override

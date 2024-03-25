@@ -8,13 +8,13 @@ import java.util.List;
 
 public class WalletMapper {
 
-    public static WalletDto walletMapperDto(Wallet wallet){
+    public static WalletDto walletMapperDto(Wallet wallet, List<Transaction> transaction){
 
         WalletDto walletDto = new WalletDto();
         walletDto.setId(wallet.getId());
         walletDto.setAccountNumber(wallet.getAccountNumber());
         walletDto.setAmount(wallet.getAmount());
-//        walletDto.setTransaction(transaction);
+        walletDto.setTransaction(transaction);
 
         return walletDto;
 

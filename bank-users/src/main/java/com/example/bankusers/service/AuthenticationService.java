@@ -2,14 +2,15 @@ package com.example.bankusers.service;
 
 
 import com.example.bankusers.dto.*;
+import com.example.bankusers.entity.Response;
 
 public interface AuthenticationService {
 
-    UsersResponseDto signup(SignUpRequest signUpRequest);
+    Response signup(SignUpRequest signUpRequest);
 
-    JwtAuthenticationResponse signin(SigninRequest signinRequest);
+    Response signin(SigninRequest signinRequest);
 
-    JwtAuthenticationResponse requestToken(RefreshTokenRequest refreshTokenRequest);
+    Response requestToken(RefreshTokenRequest refreshTokenRequest);
 
-    String validateToken();
+    Response validateToken();
 }

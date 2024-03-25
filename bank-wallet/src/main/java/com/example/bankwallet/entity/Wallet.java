@@ -20,6 +20,10 @@ public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+//    private String currency;
+//    private String currencySymbol;
+//    private String accountType;
+//    private String accountHolderName;
     private String accountNumber = accountNumberGenerator().toString();
     private BigDecimal amount = BigDecimal.ZERO;
 

@@ -2,6 +2,7 @@ package com.example.bankusers.controller;
 
 import com.example.bankusers.dto.UsersResponseDto;
 import com.example.bankusers.dto.userDto;
+import com.example.bankusers.entity.Response;
 import com.example.bankusers.entity.Users;
 import com.example.bankusers.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,31 +18,10 @@ public class UsersControllers {
     @Autowired
     private UsersService usersService;
 
-    static class Response{
-        private final HttpStatus status;
-        private final Object body;
-
-        Response(HttpStatus status, Object body) {
-            this.status = status;
-            this.body = body;
-        }
-        public HttpStatus getStatus() {
-            return status;
-        }
-
-        public Object getBody() {
-            return body;
-        }
-    }
     @GetMapping
     public ResponseEntity<Response> readAllUsers(@RequestHeader("role") String role){
-        System.out.println(role);
-        if(role == null || !role.equalsIgnoreCase("admin")){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).
-                    body(new Response(HttpStatus.FORBIDDEN, "User does not have permission to access this resource."));
-        }
-        List<Users> userList = usersService.readAll();
-        return ResponseEntity.ok(new Response(HttpStatus.OK, userList));
+        Response response = usersService.readAll(role);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -50,19 +30,16 @@ public class UsersControllers {
     }
 
     @GetMapping("/details")
-    public ResponseEntity<Response> readOneUser(@RequestHeader("role") String role , @RequestHeader("loggedInUserId") String userId){
-        if(role == null){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new Response(HttpStatus.FORBIDDEN, "cannot see users details."));
-        }
-        UsersResponseDto user = usersService.readOne(userId);
-        return ResponseEntity.ok(new Response(HttpStatus.OK, user));
+    public ResponseEntity<Response> readOneUser(@RequestHeader("loggedInUserId") String userId){
+        Response response = usersService.readOne(userId);
+        return ResponseEntity.ok(response);
 //        return usersService.readOne(userId);
     }
 
     @PutMapping("/update")
-    public Users updateUser(@RequestBody Users users, @RequestHeader("loggedInUserId") String userId){
-        return usersService.update(users, userId);
+    public ResponseEntity<Response> updateUser(@RequestBody Users users, @RequestHeader("loggedInUserId") String userId){
+        Response response = usersService.update(users, userId);
+        return ResponseEntity.ok(response);
     }
 
     //for admin

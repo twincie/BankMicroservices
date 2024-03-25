@@ -1,6 +1,7 @@
 package com.example.bankwallet.controller;
 
 import com.example.bankwallet.dto.WalletDto;
+import com.example.bankwallet.entity.Response;
 import com.example.bankwallet.service.WalletService;
 import com.example.bankwallet.entity.Wallet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,29 +20,6 @@ public class WalletController {
     @Autowired
     private WalletService walletService;
 
-    static class Response{
-        private final HttpStatus status;
-        private  final String message;
-        private final Object body;
-
-        Response(HttpStatus status, String message, Object body) {
-            this.status = status;
-            this.message = message;
-            this.body = body;
-        }
-        public HttpStatus getStatus() {
-            return status;
-        }
-
-        public Object getBody() {
-            return body;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-    }
-
     @PostMapping
     public Wallet createWallet(@RequestBody Wallet wallet){
         return walletService.create(wallet);
@@ -49,18 +27,14 @@ public class WalletController {
 
     @GetMapping("/details")
     public ResponseEntity<Response> readOneWallet(@RequestHeader("role") String role, @RequestHeader("loggedInWalletId") String walletId){
-        WalletDto wallet = walletService.readOne(walletId);
-        return ResponseEntity.ok(new Response(HttpStatus.OK, "wallet details retrieval successful", wallet));
+        Response response = walletService.readOne(walletId);
+            return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ResponseEntity<Response> readAllWallets(@RequestHeader("role") String role, @RequestHeader("loggedInWalletId") String walletId){
-        if (role.equalsIgnoreCase("admin")){
-            List<Wallet> walletList = walletService.readAll();
-            return ResponseEntity.ok(new Response(HttpStatus.OK, "list of all wallets", walletList));
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new Response(HttpStatus.FORBIDDEN, "user cant access this resource. ", null));
+        Response response = walletService.readAll(role);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{walletId}")
@@ -76,25 +50,20 @@ public class WalletController {
     @PutMapping("/topup")
     public ResponseEntity<Response> topUpWallet(@RequestBody Map<String, BigDecimal> request, @RequestHeader("loggedInWalletId") String walletId){
         BigDecimal amount = request.get("amount");
-        String walletResponse = walletService.topup(amount, walletId);
-        WalletDto wallet = walletService.readOne(walletId);
-//        return new ResponseEntity<>("Topup Successful", HttpStatus.OK);
-        if (walletResponse.equals("Topup Successful")){
-            return ResponseEntity.ok(new Response(HttpStatus.OK, walletResponse, wallet));
-        }
-        return ResponseEntity.ok(new Response(HttpStatus.FORBIDDEN, walletResponse, wallet));
+        Response walletResponse = walletService.topup(amount, walletId);
+        return ResponseEntity.ok(walletResponse);
     }
 
     @PutMapping("/withdraw")
     public ResponseEntity<Response> withdrawWallet(@RequestBody Map<String, BigDecimal> request, @RequestHeader("loggedInWalletId") String walletId){
         BigDecimal amount = request.get("amount");
-        String walletResponse = walletService.withdraw(amount, walletId);
-        WalletDto wallet = walletService.readOne(walletId);
+        Response walletResponse = walletService.withdraw(amount, walletId);
+        //WalletDto wallet = walletService.readOne(walletId);
 //        return new ResponseEntity<>("Withdraw Successful",HttpStatus.OK);
-        if (walletResponse.equals("Withdrawal Successful")){
-            return ResponseEntity.ok(new Response(HttpStatus.OK, walletResponse, wallet));
-        }
-        return ResponseEntity.ok(new Response(HttpStatus.OK, walletResponse, wallet));
+        //if (walletResponse.equals("Withdrawal Successful")){
+            return ResponseEntity.ok(walletResponse);
+        //}
+        //return ResponseEntity.ok(new Response(HttpStatus.OK, walletResponse, wallet));
     }
 
     @PutMapping("/transfer")
@@ -103,13 +72,13 @@ public class WalletController {
         Object receiverAccountNumberObj = request.get("accountNumber");
         BigDecimal amount = new BigDecimal(amountObj.toString());
         String receiverAccountNumber = receiverAccountNumberObj.toString();
-        String isTransfer = walletService.transfer(amount, receiverAccountNumber, walletId);
-        WalletDto wallet = walletService.readOne(walletId);
-        if (isTransfer.equals("Transaction Successful")){
+        Response isTransfer = walletService.transfer(amount, receiverAccountNumber, walletId);
+        //WalletDto wallet = walletService.readOne(walletId);
+        //if (isTransfer.equals("Transaction Successful")){
 //            return new ResponseEntity<>("Transfer Successful", HttpStatus.OK);
-            return ResponseEntity.ok(new Response(HttpStatus.OK, isTransfer, wallet));
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new Response(HttpStatus.FORBIDDEN, isTransfer, wallet));
+            return ResponseEntity.ok(isTransfer);
+        //}
+        //return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          //      .body(new Response(HttpStatus.FORBIDDEN, isTransfer, wallet));
     }
 }

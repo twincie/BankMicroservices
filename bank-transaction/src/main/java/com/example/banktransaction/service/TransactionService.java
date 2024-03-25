@@ -5,6 +5,7 @@ import com.example.banktransaction.entity.Transaction;
 import com.example.banktransaction.external.Wallet;
 import com.example.banktransaction.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.Optional;
 @Service
 public class TransactionService {
 
+    @LoadBalanced
     private final RestTemplate restTemplate;
     private final String walletServiceBaseUrl = "http://BANK-WALLET:8082/api/v1/wallet";
 
@@ -55,13 +57,22 @@ public class TransactionService {
     }
 
     public  Response readOneUserTransactions(String walletId){
-        Long walletIdToLong = Long.parseLong(walletId);
-        Response response = new Response();
-        List<Transaction> transactions = transactionRepository.findByWalletId(walletIdToLong);
-        response.setStatus(HttpStatus.OK);
-        response.setMessage("Successfully retrieved Transactions");
-        response.setBody(transactions);
-        return response;
+        try {
+            Response response = new Response();
+            Long walletIdToLong = Long.parseLong(walletId);
+            List<Transaction> transactions = transactionRepository.findByWalletId(walletIdToLong);
+            response.setStatus(HttpStatus.OK);
+            response.setMessage("Successfully retrieved Transactions");
+            response.setBody(transactions);
+            return response;
+//            return transactions;
+        } catch(Exception e) {
+            Response response = new Response();
+            System.out.println("Error: "+ e);
+            response.setStatus(HttpStatus.OK);
+            response.setMessage("Successfully retrieved Transactions");
+            return response;
+        }
     }
 
     public Response readAll(String role){
