@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Monthly Statement</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        /* Define CSS classes for different transaction types */
+        .topup {
+            color: green;
+        }
+        .withdraw {
+            color: red; /* Assuming you want red for debit */
+        }
+        .transfer {
+            color: blue; /* Assuming you want blue for transfer */
+        }
+    </style>
+</head>
+<body>
+<h1>Monthly Transactions</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Transaction ID</th>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Time</th>
+        <th>Type</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Use Thymeleaf to iterate over transactions and add appropriate CSS class based on type -->
+    <tr th:each="transaction : ${transactions}">
+        <td th:text="${transaction.id}"></td>
+        <td th:text="${transaction.date}"></td>
+        <td th:text="${transaction.amount}"></td>
+        <td th:text="${transaction.time}"></td>
+        <td th:text="${transaction.type}"
+            th:class="${transaction.type.equals('0') ? 'withdraw' : 'topup'}">
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

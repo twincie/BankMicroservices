@@ -1,12 +1,17 @@
 package com.example.banktransaction.controller;
 
+import com.example.banktransaction.dto.MonthlyStatementRequestDto;
+import com.example.banktransaction.dto.StatementRequestDto;
 import com.example.banktransaction.entity.Response;
 import com.example.banktransaction.entity.Transaction;
 import com.example.banktransaction.service.TransactionService;
+import com.lowagie.text.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -45,5 +50,27 @@ public class TransactionController {
     @DeleteMapping("/{transactionId}")
     public void deleteTransaction(@RequestHeader("loggedInWalletId") String walletId, @PathVariable Long transactionId){
         transactionService.delete(walletId, transactionId);
+    }
+
+    @GetMapping("monthly/statement")
+    public ResponseEntity<Resource> getMonthlyStatement(@RequestHeader("loggedInWalletId") String walletId,
+                                                        @RequestBody MonthlyStatementRequestDto monthlyStatementRequestDto) throws DocumentException, IOException {
+//        Response response = transactionService.monthlyStatement(walletId, monthlyStatementRequestDto.getYear(), monthlyStatementRequestDto.getMonth());
+        return transactionService.monthlyStatement(walletId, monthlyStatementRequestDto.getYear(), monthlyStatementRequestDto.getMonth());
+//        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("yearly/statement/{year}")
+    public ResponseEntity<Response> getYearlyStatement(@RequestHeader("loggedInWalletId") String walletId,
+                                                       @PathVariable int year){
+        Response response = transactionService.yearlyStatement(walletId, year);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/statement")
+    public ResponseEntity<Response> getStatement(@RequestHeader("loggedInWalletId") String walletId,
+                                                 @RequestBody StatementRequestDto statementRequestDto){
+        Response response = transactionService.statementForDates(walletId, statementRequestDto.getStartDate(), statementRequestDto.getStopDate());
+        return ResponseEntity.ok(response);
     }
 }
