@@ -39,8 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private UsersResponseDto convertToDto(Users user){
         //Wallet wallet = restTemplate.getForObject(walletServiceBaseUrl+"/"+user.getWalletId(), Wallet.class);
-        UsersResponseDto usersResponseDto = UserMapper.userMapperDto(user);
-        return usersResponseDto;
+        return UserMapper.userMapperDto(user);
     }
 
     private int calculatePasswordStrength(String password) {
