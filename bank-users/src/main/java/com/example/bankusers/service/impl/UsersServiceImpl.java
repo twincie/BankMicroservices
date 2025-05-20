@@ -10,6 +10,9 @@ import com.example.bankusers.external.Wallet;
 import com.example.bankusers.mapper.UserMapper;
 import com.example.bankusers.repository.UsersRepository;
 import com.example.bankusers.service.UsersService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -72,6 +75,9 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
+//    @CircuitBreaker(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
+//    @Retry(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
+//    @RateLimiter(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
     public Response readAll(String role ) {
         if(role == null || !role.equalsIgnoreCase("admin")){
             return new Response(HttpStatus.FORBIDDEN,
@@ -84,6 +90,12 @@ public class UsersServiceImpl implements UsersService {
         }
         return new Response(HttpStatus.OK,
                 "List of all Users", usersDtoList);
+    }
+
+    public List<String> companyBreakerFallback(Exception e) {
+        List<String> fallback = new ArrayList<>();
+        fallback.add("User does not have permission to access this resource.");
+        return fallback;
     }
 
     @Override

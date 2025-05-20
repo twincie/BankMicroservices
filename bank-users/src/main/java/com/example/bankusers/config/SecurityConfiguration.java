@@ -33,6 +33,8 @@ public class SecurityConfiguration {
     public SecurityFilterChain customSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
+                        .requestMatchers("/actuator").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/users").hasAnyAuthority(Role.USER.name(), Role.ADMIN.name())
                         .requestMatchers("/api/v1/users/**").hasAnyAuthority(Role.USER.name(), Role.ADMIN.name())
