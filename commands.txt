@@ -1,0 +1,13 @@
+====================
+./mvnw package
+==to package your application
+
+====================
+jar -tf <path to your jar file>
+jar -tf .\target\bank-users-0.0.1-SNAPSHOT.jar
+==to see all the content of your jar file
+
+====================
+java -jar <path to your jar file>
+java -jar .\target\bank-users-0.0.1-SNAPSHOT.jar
+==to run your packaged project in the terminal
