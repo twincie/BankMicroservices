@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="bank-transaction" />
         <module name="bank-wallet" />
+        <module name="configserver" />
         <module name="service-registry" />
         <module name="gateway" />
         <module name="bank-users" />
@@ -20,6 +21,7 @@
       <module name="bank-transaction" options="-parameters" />
       <module name="bank-users" options="-parameters" />
       <module name="bank-wallet" options="-parameters" />
+      <module name="configserver" options="-parameters" />
       <module name="gateway" options="-parameters" />
       <module name="service-registry" options="-parameters" />
     </option>
