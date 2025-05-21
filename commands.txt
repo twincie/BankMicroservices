@@ -11,3 +11,13 @@ jar -tf .\target\bank-users-0.0.1-SNAPSHOT.jar
 java -jar <path to your jar file>
 java -jar .\target\bank-users-0.0.1-SNAPSHOT.jar
 ==to run your packaged project in the terminal
+
+====================
+./mvnw spring-boot:build-image "-Dspring-boot.build-image.imageName=<your-dockerhub-username./<your-image-name>"
+./mvnw spring-boot:build-image "-Dspring-boot.build-image.imageName=twincie/servicereg"
+==creating your docker image
+
+=====================
+docker push <your-dockerhub-username./<your-image-name>
+docker push twincie/servicereg
+==pushing your docker image

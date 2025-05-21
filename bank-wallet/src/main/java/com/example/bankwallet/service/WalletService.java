@@ -30,8 +30,12 @@ public class WalletService {
     private WalletRepository walletRepository;
     @LoadBalanced
     private final RestTemplate restTemplate;
+//    String transactionBaseUrl = "${transaction-service.url}";
+//    private final String transactionServiceBaseUrl = transactionBaseUrl + "/api/v1/transaction";
     private final String transactionServiceBaseUrl = "http://BANK-TRANSACTION/api/v1/transaction";
 
+//    String userBaseUrl = "${user-service.url}";
+//    private final String usersServiceBaseUrl = userBaseUrl + "/api/v1/users";
     private final String usersServiceBaseUrl = "http://BANK-USERS/api/v1/users";
 
     public WalletService(RestTemplate restTemplate) {
