@@ -1,0 +1,142 @@
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+#      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'false'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  config-server:
+    image: twincie/config-server
+    container_name: config-server
+    ports:
+      - 8080:8080
+    depends_on:
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  servicereg:
+    image: twincie/servicereg
+    container_name: servicereg
+    ports:
+      - 8761:8761
+    depends_on:
+      - RabbitMQ
+      - zipkin
+      - postgres
+      - pgadmin
+    networks:
+      - microservice-network
+      - postgres
+
+  bank-users:
+    image: twincie/bank-users
+    container_name: bank-users
+    ports:
+      - 8081:8081
+    depends_on:
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE= 'http://servicereg:8761/eureka'
+
+  bank-wallet:
+    image: twincie/bank-wallet
+    container_name: bank-wallet
+    ports:
+      - 8082:8082
+    depends_on:
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE= http://servicereg:8761/eureka
+
+  bank-transaction:
+    image: twincie/bank-transaction
+    container_name: bank-transaction
+    ports:
+      - 8083:8083
+    depends_on:
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE= http://servicereg:8761/eureka
+
+  RabbitMQ:
+    image: rabbitmq:3-management
+    container_name: RabbitMQ
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - microservice-network
+      - postgres
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - 9411:9411
+    networks:
+      - microservice-network
+      - postgres
+
+  gateway:
+    image: twincie/gateway
+    container_name: gateway
+    ports:
+      - 8084:8084
+    depends_on:
+      - servicereg
+    networks:
+      - microservice-network
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE= http://servicereg:8761/eureka
+
+networks:
+  microservice-network:
+    driver: bridge
+  postgres:
+    driver: bridge
+
+volumes:
+  postgres:
+    external: true
