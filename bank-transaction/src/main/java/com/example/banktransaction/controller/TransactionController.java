@@ -1,11 +1,11 @@
 package com.example.banktransaction.controller;
 
+import com.example.banktransaction.dto.DefaultApiResponse;
 import com.example.banktransaction.dto.MonthlyStatementRequestDto;
 import com.example.banktransaction.dto.StatementRequestDto;
 import com.example.banktransaction.entity.Response;
 import com.example.banktransaction.entity.Transaction;
 import com.example.banktransaction.service.TransactionService;
-import com.lowagie.text.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -22,55 +22,50 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping
-    public Transaction createTransaction(@RequestBody Transaction transaction){
+    public DefaultApiResponse createTransaction(@RequestBody Transaction transaction){
         return transactionService.create(transaction);
     }
+
     @GetMapping("/all")
-    public ResponseEntity<Response> readAllTransactions(@RequestHeader("role") String role){
-        Response response = transactionService.readAll(role);
-            return ResponseEntity.ok(response);
+    public DefaultApiResponse readAllTransactions(@RequestHeader("role") String role){
+        return transactionService.readAll(role);
     }
 
     @GetMapping("/{transactionId}")
-    public ResponseEntity<Response> readOneTransaction(@PathVariable Long transactionId, @RequestHeader("loggedInWalletId") String walletId){
-        Response response = transactionService.readOne(transactionId, walletId);
-        return ResponseEntity.ok(response);
+    public DefaultApiResponse readOneTransaction(@PathVariable Long transactionId, @RequestHeader("loggedInWalletId") String walletId){
+        return transactionService.readOne(transactionId, walletId);
     }
     @GetMapping("/details")
-    public ResponseEntity<Response> readAllUserTransactions(@RequestHeader("loggedInWalletId") String walletId){
-        Response response = transactionService.readOneUserTransactions(walletId);
-        return ResponseEntity.ok(response);
+    public DefaultApiResponse readAllUserTransactions(@RequestHeader("loggedInWalletId") String walletId){
+        return transactionService.readOneUserTransactions(walletId);
     }
 
     @PutMapping("/{transactionId}")
-    public ResponseEntity<Response> updateTransaction(@RequestHeader("loggedInWalletId") String walletId, @PathVariable Long transactionId, @RequestBody Transaction transaction){
-        Response response = transactionService.update(walletId, transactionId, transaction);
-        return  ResponseEntity.ok(response);
+    public DefaultApiResponse updateTransaction(@RequestHeader("loggedInWalletId") String walletId, @PathVariable Long transactionId, @RequestBody Transaction transaction){
+        return transactionService.update(walletId, transactionId, transaction);
     }
     @DeleteMapping("/{transactionId}")
-    public void deleteTransaction(@RequestHeader("loggedInWalletId") String walletId, @PathVariable Long transactionId){
-        transactionService.delete(walletId, transactionId);
+    public DefaultApiResponse deleteTransaction(@RequestHeader("loggedInWalletId") String walletId, @PathVariable Long transactionId){
+        return transactionService.delete(walletId, transactionId);
     }
 
     @GetMapping("monthly/statement")
-    public ResponseEntity<Resource> getMonthlyStatement(@RequestHeader("loggedInWalletId") String walletId,
-                                                        @RequestBody MonthlyStatementRequestDto monthlyStatementRequestDto) throws DocumentException, IOException {
+    public DefaultApiResponse getMonthlyStatement(@RequestHeader("loggedInWalletId") String walletId,
+                                                        @RequestBody MonthlyStatementRequestDto monthlyStatementRequestDto) throws IOException {
 //        Response response = transactionService.monthlyStatement(walletId, monthlyStatementRequestDto.getYear(), monthlyStatementRequestDto.getMonth());
         return transactionService.monthlyStatement(walletId, monthlyStatementRequestDto.getYear(), monthlyStatementRequestDto.getMonth());
 //        return ResponseEntity.ok(response);
     }
 
     @GetMapping("yearly/statement/{year}")
-    public ResponseEntity<Response> getYearlyStatement(@RequestHeader("loggedInWalletId") String walletId,
+    public DefaultApiResponse getYearlyStatement(@RequestHeader("loggedInWalletId") String walletId,
                                                        @PathVariable int year){
-        Response response = transactionService.yearlyStatement(walletId, year);
-        return ResponseEntity.ok(response);
+        return transactionService.yearlyStatement(walletId, year);
     }
 
     @GetMapping("/statement")
-    public ResponseEntity<Response> getStatement(@RequestHeader("loggedInWalletId") String walletId,
+    public DefaultApiResponse getStatement(@RequestHeader("loggedInWalletId") String walletId,
                                                  @RequestBody StatementRequestDto statementRequestDto){
-        Response response = transactionService.statementForDates(walletId, statementRequestDto.getStartDate(), statementRequestDto.getStopDate());
-        return ResponseEntity.ok(response);
+        return transactionService.statementForDates(walletId, statementRequestDto.getStartDate(), statementRequestDto.getStopDate());
     }
 }

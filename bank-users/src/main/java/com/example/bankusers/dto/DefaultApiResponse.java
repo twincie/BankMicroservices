@@ -1,4 +1,4 @@
-package com.example.bankusers.entity;
+package com.example.bankusers.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Response {
-    private HttpStatus status;
+public class DefaultApiResponse {
+    private String status;
     private  String message;
-    private Object body;
+    private Object data;
 }

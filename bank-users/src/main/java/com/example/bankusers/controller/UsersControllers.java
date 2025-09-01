@@ -1,16 +1,11 @@
 package com.example.bankusers.controller;
 
-import com.example.bankusers.dto.UsersResponseDto;
-import com.example.bankusers.dto.userDto;
-import com.example.bankusers.entity.Response;
+import com.example.bankusers.dto.DefaultApiResponse;
 import com.example.bankusers.entity.Users;
 import com.example.bankusers.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -19,32 +14,28 @@ public class UsersControllers {
     private UsersService usersService;
 
     @GetMapping
-    public ResponseEntity<Response> readAllUsers(@RequestHeader("role") String role){
-        Response response = usersService.readAll(role);
-        return ResponseEntity.ok(response);
+    public DefaultApiResponse readAllUsers(@RequestHeader("role") String role) {
+        return usersService.readAll(role);
     }
 
     @PostMapping
-    public Users createUser(@RequestBody Users users){
+    public DefaultApiResponse createUser(@RequestBody Users users){
         return usersService.create(users);
     }
 
     @GetMapping("/details")
-    public ResponseEntity<Response> readOneUser(@RequestHeader("loggedInUserId") String userId){
-        Response response = usersService.readOne(userId);
-        return ResponseEntity.ok(response);
-//        return usersService.readOne(userId);
+    public DefaultApiResponse readOneUser(@RequestHeader("loggedInUserId") String userId){
+        return usersService.readOne(userId);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Response> updateUser(@RequestBody Users users, @RequestHeader("loggedInUserId") String userId){
-        Response response = usersService.update(users, userId);
-        return ResponseEntity.ok(response);
+    public DefaultApiResponse updateUser(@RequestBody Users users, @RequestHeader("loggedInUserId") String userId){
+        return usersService.update(users, userId);
     }
 
     //for admin
-    @DeleteMapping("/delete")
-    public void deleteUser(@PathVariable Long id){
-        usersService.delete(id);
+    @DeleteMapping("/delete/{id}")
+    public DefaultApiResponse deleteUser(@PathVariable Long id){
+        return usersService.delete(id);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.bankusers.service.impl;
 
+import com.example.bankusers.config.ExtendedConstants;
 import com.example.bankusers.dto.*;
-import com.example.bankusers.entity.Response;
 import com.example.bankusers.entity.Role;
 import com.example.bankusers.entity.Users;
 import com.example.bankusers.mapper.UserMapper;
@@ -10,8 +10,6 @@ import com.example.bankusers.service.AuthenticationService;
 import com.example.bankusers.service.JWTService;
 import com.example.bankusers.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -69,15 +67,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return strength;
     }
 
-    public Response signup(SignUpRequest signUpRequest){
-        Response response = new Response();
+    public DefaultApiResponse signup(SignUpRequest signUpRequest){
+        DefaultApiResponse response = new DefaultApiResponse();
         if (!usersRepository.existsByUsername(signUpRequest.getUsername())){
             if (!usersRepository.existsByEmail(signUpRequest.getEmail())) {
                 String password = signUpRequest.getPassword();
                 int strength = calculatePasswordStrength(password);
                 if (strength < 3) {
-                    response.setStatus(HttpStatus.FORBIDDEN);
-                    response.setMessage("Weak Password");
+                    response.setStatus(ExtendedConstants.ResponseCode.WEAK_PASSWORD.getCode());
+                    response.setMessage(ExtendedConstants.ResponseCode.WEAK_PASSWORD.getDescription());
                     return response;
                 }
                 Users users = new Users();
@@ -86,24 +84,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 users.setRole(Role.USER);
                 users.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-                Users user = usersService.create(users);
+                DefaultApiResponse apiResponse = usersService.create(users);
                 // return convertToDto(user);
-                response.setStatus(HttpStatus.OK);
-                response.setMessage("User Registerd Successfully.");
-                response.setBody(convertToDto(user));
+                if (ExtendedConstants.ResponseCode.SUCCESS.getCode().equalsIgnoreCase(apiResponse.getStatus())) {
+                    response.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+                    response.setMessage(ExtendedConstants.ResponseCode.EMAIL_EXISTS.getDescription());
+//                    response.setData(convertToDto(user));
+                }
                 return response;
             }
-            response.setStatus(HttpStatus.FORBIDDEN);
-            response.setMessage("Email Already exists.");
+            response.setStatus(ExtendedConstants.ResponseCode.EMAIL_EXISTS.getCode());
+            response.setMessage(ExtendedConstants.ResponseCode.EMAIL_EXISTS.getDescription());
             return response;
         }
-        response.setStatus(HttpStatus.FORBIDDEN);
-        response.setMessage("Username Already exists.");
+        response.setStatus(ExtendedConstants.ResponseCode.USERNAME_EXISTS.getCode());
+        response.setMessage(ExtendedConstants.ResponseCode.USERNAME_EXISTS.getDescription());
         return response;
     }
 
-    public Response signin(SigninRequest signinRequest){
-        Response response = new Response();
+    public DefaultApiResponse signin(SigninRequest signinRequest){
+        DefaultApiResponse response = new DefaultApiResponse();
         if (usersRepository.existsByUsername(signinRequest.getUsername())) {
             try {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(signinRequest.getUsername(), signinRequest.getPassword());
@@ -118,25 +118,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
                 jwtAuthenticationResponse.setToken(jwt);
                 jwtAuthenticationResponse.setRefreshToken(refreshToken);
-                response.setStatus(HttpStatus.OK);
-                response.setMessage("User logged in Successfully.");
-                response.setBody(jwtAuthenticationResponse);
+                response.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+                response.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+                response.setData(jwtAuthenticationResponse);
                 return response;
                 // return jwtAuthenticationResponse;
             } catch (AuthenticationException e) {
                 //throw new IllegalArgumentException("Authentication failed: " + e.getMessage());
                 System.out.println("Authentication failed: " + e.getMessage());
-                response.setStatus(HttpStatus.FORBIDDEN);
+                response.setStatus(ExtendedConstants.ResponseCode.WRONG_PASSWORD.getCode());
                 response.setMessage("Wrong Password");
                 return response;
             }
         }
-        response.setStatus(HttpStatus.FORBIDDEN);
-        response.setMessage("Username doesnt exist");
+        response.setStatus(ExtendedConstants.ResponseCode.USERNAME_NOT_FOUND.getCode());
+        response.setMessage(ExtendedConstants.ResponseCode.USERNAME_NOT_FOUND.getDescription());
         return response;
     }
 
-    public Response requestToken(RefreshTokenRequest refreshTokenRequest){
+    public DefaultApiResponse requestToken(RefreshTokenRequest refreshTokenRequest){
+        DefaultApiResponse response = new DefaultApiResponse();
         String userName = jwtService.extractUserName(refreshTokenRequest.getToken());
         Users user = usersRepository.findByUsername(userName).orElseThrow();
         if (jwtService.isTokenValid(refreshTokenRequest.getToken(), user)){
@@ -146,20 +147,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             jwtAuthenticationResponse.setToken(jwt);
             jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
             // return jwtAuthenticationResponse;
-            return new Response(HttpStatus.FORBIDDEN, "Token is valid!!", jwtAuthenticationResponse);
+            response.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+            response.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+            response.setData(jwtAuthenticationResponse);
+//            Response(HttpStatus.FORBIDDEN, "Token is valid!!", jwtAuthenticationResponse);
+            return response;
         }
-        return new Response(HttpStatus.FORBIDDEN, "Token not valid!!", null);
+        response.setStatus(ExtendedConstants.ResponseCode.INVALID_TOKEN.getCode());
+        response.setMessage(ExtendedConstants.ResponseCode.INVALID_TOKEN.getDescription());
+//        return new Response(HttpStatus.FORBIDDEN, "Token not valid!!", null);
+        return response;
     }
 
-    public Response validateToken(){
+    public DefaultApiResponse validateToken(){
+        DefaultApiResponse response = new DefaultApiResponse();
 //        String userName = jwtService.extractUserName(token);
 //        Users user = usersRepository.findByUsername(userName).orElseThrow();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null){
-            return new Response(HttpStatus.FORBIDDEN, "Token not valid!!", null);
+            response.setStatus(ExtendedConstants.ResponseCode.INVALID_TOKEN.getCode());
+            response.setMessage(ExtendedConstants.ResponseCode.INVALID_TOKEN.getDescription());
+            return response;
+//            return new Response(HttpStatus.FORBIDDEN, "Token not valid!!", null);
         }
-        return new Response(HttpStatus.FORBIDDEN, "Token is valid!!",  authentication);
+        response.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+        response.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+        response.setData(authentication);
+        return response;
+//        return new Response(HttpStatus.FORBIDDEN, "Token is valid!!",  authentication);
 
 //        if (jwtService.isTokenValid(token, user)){
 //            return "Token is valid";

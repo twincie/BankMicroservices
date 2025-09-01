@@ -1,12 +1,11 @@
 package com.example.bankwallet.service;
 
 
+import com.example.bankwallet.config.ExtendedConstants;
+import com.example.bankwallet.dto.DefaultApiResponse;
 import com.example.bankwallet.dto.WalletDto;
-import com.example.bankwallet.entity.Response;
-import com.example.bankwallet.external.Role;
 import com.example.bankwallet.external.Transaction;
 import com.example.bankwallet.external.TransactionType;
-import com.example.bankwallet.external.Users;
 import com.example.bankwallet.mapper.WalletMapper;
 import com.example.bankwallet.repository.WalletRepository;
 import com.example.bankwallet.entity.Wallet;
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,8 +39,6 @@ public class WalletService {
         this.restTemplate = restTemplate;
     }
 
-
-
     private WalletDto convertToDto(Wallet wallet){
         Long walletId = wallet.getId();
         String walletIdtoString = walletId.toString();
@@ -51,8 +46,8 @@ public class WalletService {
         header.set("loggedInWalletId", walletIdtoString);
         HttpEntity<String> entity = new HttpEntity<>(header);
 
-        ResponseEntity<Response> response = restTemplate.exchange(transactionServiceBaseUrl+"/details", HttpMethod.GET, entity, new ParameterizedTypeReference<Response>(){});
-        Object object = response.getBody().getBody();
+        ResponseEntity<DefaultApiResponse> response = restTemplate.exchange(transactionServiceBaseUrl+"/details", HttpMethod.GET, entity, DefaultApiResponse.class);
+        Object object = response.getBody().getData();
         if (object instanceof List) {
             List<Transaction> transactionList = (List<Transaction>) object;
             System.out.println(transactionList);
@@ -62,41 +57,84 @@ public class WalletService {
         return null;
     }
 
-    public Wallet create(Wallet wallet){
-        return walletRepository.save(wallet);
+    public DefaultApiResponse create(Wallet wallet){
+        DefaultApiResponse apiResponse = new DefaultApiResponse();
+        try {
+            walletRepository.save(wallet);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.FAILED.getDescription());
+        }
+        return  apiResponse;
     }
 
-    public Response readOne(String walletId){
+    public DefaultApiResponse readOne(String walletId){
+        DefaultApiResponse apiResponse = new DefaultApiResponse();
         try {
             Long walletIdToLong = Long.parseLong(walletId);
             Wallet wallet = walletRepository.findById(walletIdToLong).orElseThrow(null);
-            return new Response(HttpStatus.OK, "wallet details retrieval successful", wallet);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+            apiResponse.setData(wallet);
         } catch (Exception e) {
             System.out.println("Error: " + e);
-            return new Response(HttpStatus.OK, "Server down!!, wait a while.", null);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.FAILED.getDescription());
         }
+        return  apiResponse;
     }
 
-    public Response readAll(String role){
+    public DefaultApiResponse readAll(String role){
+        DefaultApiResponse apiResponse = new DefaultApiResponse();
         if (role.equalsIgnoreCase("admin")){
             List<Wallet> walletList = walletRepository.findAll();
-            return new Response(HttpStatus.OK, "list of all wallets", walletList);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+            apiResponse.setData(walletList);
+            return apiResponse;
         }
-        return new Response(HttpStatus.FORBIDDEN, "user cant access this resource. ", null);
+        apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+        apiResponse.setMessage(ExtendedConstants.ResponseCode.FAILED.getDescription());
+        return apiResponse;
     }
 
-    public Wallet update(Long walletId, Wallet updater){
-        updater.setId(walletId);
-        return walletRepository.save(updater);
-    }
-
-    public void delete(Long walletId){
-        walletRepository.deleteById(walletId);
-    }
-
-    public Response topup(BigDecimal amount, String walletId){
+    public DefaultApiResponse update(Long walletId, Wallet updater){
+        DefaultApiResponse apiResponse = new DefaultApiResponse();
         try {
-            Response response = new Response();
+            updater.setId(walletId);
+            Wallet wallet = walletRepository.save(updater);
+            WalletDto walletDto = convertToDto(wallet);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+            apiResponse.setData(walletDto);
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.FAILED.getDescription());
+        }
+        return  apiResponse;
+    }
+
+    public DefaultApiResponse delete(Long walletId){
+        DefaultApiResponse apiResponse = new DefaultApiResponse();
+        try {
+            walletRepository.deleteById(walletId);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.FAILED.getDescription());
+        }
+        return  apiResponse;
+    }
+
+    public DefaultApiResponse topup(BigDecimal amount, String walletId){
+        DefaultApiResponse apiResponse = new DefaultApiResponse();
+        try {
             Long walletIdToLong = Long.parseLong(walletId);
             Optional<Wallet> globalWalletInfo = walletRepository.findByAccountNumber("1000000000");
             Optional<Wallet> walletoptional = walletRepository.findById(walletIdToLong);
@@ -119,31 +157,33 @@ public class WalletService {
 
 
                     restTemplate.postForObject(transactionServiceBaseUrl+"?walletId=" + wallet.getId(), transaction ,Transaction.class);
-                    walletRepository.save(wallet);
+                    Wallet wallet1 = walletRepository.save(wallet);
                     walletRepository.save(globalWallet);
 
-                    response.setStatus(HttpStatus.OK);
-                    response.setMessage("Topup Successful");
-                    //WalletDto walletDto = convertToDto(wallet, )
-                    response.setBody(wallet);
-                    return response;
+                    apiResponse.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+                    apiResponse.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+                    WalletDto walletDto = convertToDto(wallet1);
+                    apiResponse.setData(walletDto);
+                    return apiResponse;
                 }
-                response.setStatus(HttpStatus.FORBIDDEN);
-                response.setMessage("amount too small");
-                return response;
+                apiResponse.setStatus(ExtendedConstants.ResponseCode.NO_PERMISSION.getCode());
+                apiResponse.setMessage(ExtendedConstants.ResponseCode.NO_PERMISSION.getDescription());
+                return apiResponse;
             }
-            response.setStatus(HttpStatus.FORBIDDEN);
-            response.setMessage("Wallet doesnt exist!!");
-            return response;
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.NOT_FOUND.getCode());
+            apiResponse.setMessage("Wallet doesnt exist!!");
+            return apiResponse;
         } catch (Exception e) {
             System.out.println("Error: " + e);
-            return new Response(HttpStatus.OK, "Server down!!, wait a while.", null);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.FAILED.getCode());
+            return apiResponse;
         }
     }
 
-    public Response withdraw(BigDecimal amount, String walletId){
+    public DefaultApiResponse withdraw(BigDecimal amount, String walletId){
+        DefaultApiResponse apiResponse = new DefaultApiResponse();
         try {
-            Response response = new Response();
             Long walletIdToLong = Long.parseLong(walletId);
             Optional<Wallet> globalWalletInfo = walletRepository.findByAccountNumber("1000000000");
             Optional<Wallet> walletoptional = walletRepository.findById(walletIdToLong);
@@ -167,31 +207,34 @@ public class WalletService {
 
 
                     restTemplate.postForObject(transactionServiceBaseUrl + "?walletId=" + wallet.getId(), transaction, Transaction.class);
-                    walletRepository.save(wallet);
+                    Wallet wallet1 = walletRepository.save(wallet);
+                    WalletDto wallerDto = convertToDto(wallet1);
                     walletRepository.save(globalWallet);
 
     //                System.out.println(transactionServiceBaseUrl);
-                    response.setStatus(HttpStatus.OK);
-                    response.setMessage("Withdrawal Successful");
-                    response.setBody(wallet);
-                    return response;
+                    apiResponse.setStatus(ExtendedConstants.ResponseCode.NOT_FOUND.getCode());
+                    apiResponse.setMessage(ExtendedConstants.ResponseCode.NOT_FOUND.getCode());
+                    apiResponse.setData(wallerDto);
+                    return apiResponse;
                 }
-                response.setStatus(HttpStatus.FORBIDDEN);
-                response.setMessage("amount too small");
-                return response;
+                apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+                apiResponse.setMessage("amount too small");
+                return apiResponse;
             }
-            response.setStatus(HttpStatus.FORBIDDEN);
-            response.setMessage("Wallet doesnt exist!!");
-            return response;
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+            apiResponse.setMessage("Wallet doesnt exist!!");
+            return apiResponse;
         } catch (Exception e) {
             System.out.println("Error: " + e);
-            return new Response(HttpStatus.OK, "Server down!!, wait a while.", null);
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+            apiResponse.setMessage(ExtendedConstants.ResponseCode.FAILED.getCode());
+            return apiResponse;
         }
     }
 
-    public Response transfer(BigDecimal amount, String accountNumber, String walletId){
+    public DefaultApiResponse transfer(BigDecimal amount, String accountNumber, String walletId){
+        DefaultApiResponse apiResponse = new DefaultApiResponse();
         try {
-            Response response = new Response();
             Long walletIdToLong = Long.parseLong(walletId);
             Optional<Wallet> globalWallet = walletRepository.findByAccountNumber("1000000000");
             Optional<Wallet> senderWallet = walletRepository.findById(walletIdToLong);
@@ -212,9 +255,9 @@ public class WalletService {
                         balance1 = balance1.add(charges(amount));
                         //walletRepository.save(sendWallet);
                     } else{
-                        response.setStatus(HttpStatus.OK);
-                        response.setMessage("Amount too small or bigger than wallet balance");
-                        return response;
+                        apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+                        apiResponse.setMessage("Amount too small or bigger than wallet balance");
+                        return apiResponse;
                     }
                     if (amount.compareTo(charges(amount)) > 0) {
                         BigDecimal receiverBalance = receiveWallet.getAmount().add(amount.subtract(charges(amount)));
@@ -222,9 +265,9 @@ public class WalletService {
                         balance1 = balance1.add(charges(amount));
                         //walletRepository.save(receiveWallet);
                     } else{
-                        response.setStatus(HttpStatus.OK);
-                        response.setMessage("amount too small to be deposited");
-                        return response;
+                        apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+                        apiResponse.setMessage("amount too small to be deposited");
+                        return apiResponse;
                     }
                     //globalbank charges
                     wallet1.setAmount(balance1);
@@ -248,21 +291,23 @@ public class WalletService {
 
 
                     //return "Transaction Successful";
-                    response.setStatus(HttpStatus.OK);
-                    response.setMessage("Transaction Successful");
-                    response.setBody(sendWallet);
-                    return response;
+                    apiResponse.setStatus(ExtendedConstants.ResponseCode.SUCCESS.getCode());
+                    apiResponse.setMessage(ExtendedConstants.ResponseCode.SUCCESS.getDescription());
+                    apiResponse.setData(sendWallet);
+                    return apiResponse;
                 }
-                response.setStatus(HttpStatus.OK);
-                response.setMessage("same wallet");
-                return response;
+                apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+                apiResponse.setMessage("same wallet");
+                return apiResponse;
             }
-            response.setStatus(HttpStatus.OK);
-            response.setMessage("wallet does not exist");
-            return response;
+            apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+            apiResponse.setMessage("wallet does not exist");
+            return apiResponse;
     } catch (Exception e) {
         System.out.println("Error: " + e);
-        return new Response(HttpStatus.OK, "Server down!!, wait a while.", null);
+        apiResponse.setStatus(ExtendedConstants.ResponseCode.FAILED.getCode());
+        apiResponse.setMessage(ExtendedConstants.ResponseCode.FAILED.getDescription());
+        return apiResponse;
     }
     }
 
